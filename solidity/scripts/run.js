@@ -1,12 +1,22 @@
 const hre = require("hardhat");
 
 async function main() {
-  const contractFactory = await hre.ethers.getContractFactory("Hello");
-  const contract = await contractFactory.deploy();
-  await contract.deployed();
+  const [deployer, pub, sub] = await hre.ethers.getSigners();
+  console.log(`Deployer address: ${deployer.address}`);
+  console.log(`Pub address: ${pub.address}`);
+  console.log(`Sub address: ${sub.address}`);
 
-  const helloTxn = await contract.hello();
-  await helloTxn.wait();
+  const regContrFact = await hre.ethers.getContractFactory("FeedRegistry");
+  const regContr = await regContrFact.deploy();
+  await regContr.deployed();
+
+  console.log(`Registry contract address: ${regContr.address}`);
+
+  const setupPubTxn = await regContr.connect(pub).setupPublisher();
+  await setupPubTxn.wait();
+
+  const setupSubTxn = await regContr.connect(sub).setupSubscriber();
+  await setupSubTxn.wait();
 }
 
 main().catch((error) => {

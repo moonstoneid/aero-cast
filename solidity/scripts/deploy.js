@@ -2,9 +2,9 @@ const hre = require("hardhat");
 
 async function main() {
   const [deployer] = await hre.ethers.getSigners();
-  console.log("Deploying contract with account: ", deployer.address);
+  console.log(`Deployer address: ${deployer.address}`);
 
-  const contractFactory = await hre.ethers.getContractFactory("Hello");
+  const contractFactory = await hre.ethers.getContractFactory("FeedRegistry");
   const contract = await contractFactory.deploy();
   await contract.deployed();
 
