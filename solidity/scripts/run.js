@@ -1,22 +1,54 @@
 const hre = require("hardhat");
 
+const pubContractMeta = require('../artifacts/contracts/FeedPublisher.sol/FeedPublisher.json');
+const subContractMeta = require('../artifacts/contracts/FeedSubscriber.sol/FeedSubscriber.json');
+
 async function main() {
-  const [deployer, pub, sub] = await hre.ethers.getSigners();
-  console.log(`Deployer address: ${deployer.address}`);
+  // Get signers
+  const [main, pub, sub] = await hre.ethers.getSigners();
+  console.log(`Main address: ${main.address}`);
   console.log(`Pub address: ${pub.address}`);
   console.log(`Sub address: ${sub.address}`);
 
-  const regContrFact = await hre.ethers.getContractFactory("FeedRegistry");
-  const regContr = await regContrFact.deploy();
-  await regContr.deployed();
+  // Create registry
+  const regContr = await createRegistry(main);
 
-  console.log(`Registry contract address: ${regContr.address}`);
+  // Create publisher
+  const pubContr = await createPublisher(regContr, pub);
+  // Publish
+  await pubContr.connect(pub).publish();
 
-  const setupPubTxn = await regContr.connect(pub).setupPublisher();
-  await setupPubTxn.wait();
+  // Create subscriber
+  const subContr = await createSubscriber(regContr, sub);
+  // Subscribe
+  await subContr.connect(sub).subscribe();
+}
 
-  const setupSubTxn = await regContr.connect(sub).setupSubscriber();
-  await setupSubTxn.wait();
+async function createRegistry(main) {
+  const contrFact = await hre.ethers.getContractFactory("FeedRegistry");
+  const contr = await contrFact.connect(main).deploy();
+  console.log(`Registry contract address: ${contr.address}`);
+  return contr;
+}
+
+async function createPublisher(regContr, pub) {
+  const setupTxn = await regContr.connect(pub).setupPublisher();
+  await setupTxn.wait();
+
+  const contrAddr = await regContr.connect(pub).getPublisherContract();
+  console.log(`Pub contract address: ${contrAddr}`);
+
+  return new hre.ethers.Contract(contrAddr, pubContractMeta.abi, pub);
+}
+
+async function createSubscriber(regContr, sub) {
+  const setupTxn = await regContr.connect(sub).setupSubscriber();
+  await setupTxn.wait();
+
+  const contrAddr = await regContr.connect(sub).getSubscriberContract();
+  console.log(`Sub contract address: ${contrAddr}`);
+
+  return new hre.ethers.Contract(contrAddr, subContractMeta.abi, sub);
 }
 
 main().catch((error) => {
