@@ -15,13 +15,20 @@ async function main() {
 
   // Create publisher
   const pubContr = await createPublisher(regContr, pub);
-  // Publish
-  await pubContr.connect(pub).publish();
-
   // Create subscriber
   const subContr = await createSubscriber(regContr, sub);
+
   // Subscribe
-  await subContr.connect(sub).subscribe();
+  await subContr.connect(sub).subscribe(pubContr.address);
+
+  // Listen for publish events
+  pubContr.on("NewPubItem", (num) => {
+    console.log(`New item ${num} has been published.`);
+  });
+
+  // Publish
+  await pubContr.connect(pub).publish("Hello!");
+  await pubContr.connect(pub).publish("Servus!");
 }
 
 async function createRegistry(main) {
