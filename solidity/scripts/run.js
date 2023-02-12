@@ -1,4 +1,5 @@
 const hre = require("hardhat");
+const utils = hre.ethers.utils;
 
 const pubContractMeta = require('../artifacts/contracts/FeedPublisher.sol/FeedPublisher.json');
 const subContractMeta = require('../artifacts/contracts/FeedSubscriber.sol/FeedSubscriber.json');
@@ -27,8 +28,19 @@ async function main() {
   });
 
   // Publish
-  await pubContr.connect(pub).publish("Hello!");
-  await pubContr.connect(pub).publish("Servus!");
+  let hash1 = utils.keccak256(utils.toUtf8Bytes("Hello!")).substring(0,9);
+  let hash2 = utils.keccak256(utils.toUtf8Bytes("Servus!")).substring(0,9);
+
+  await pubContr.connect(pub).publish(hash1);
+  await pubContr.connect(pub).publish(hash2);
+
+  // React to item 0 and 1
+  await subContr.connect(sub).reactToPubItem(pubContr.address, hash1, 1); // Enums are treated as unit
+  await subContr.connect(sub).reactToPubItem(pubContr.address, hash2, 2); // Enums are treated as unit
+
+  // Get reactions for publisher
+  let reactionArray = await subContr.connect(sub).getReactions(pubContr.address);
+  console.log(reactionArray);
 }
 
 async function createRegistry(main) {

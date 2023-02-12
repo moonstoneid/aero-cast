@@ -12,7 +12,7 @@ contract FeedPublisher is Ownable {
 
     struct PubItem {
         uint timestamp;
-        string message;
+        string hash; // First 7 chars of a SHA3(guid) hash, just like Git short hashes
     }
 
     PubItem[] private _pubItems;
@@ -21,10 +21,10 @@ contract FeedPublisher is Ownable {
         
     }
 
-    function publish(string memory _message) public onlyOwner {
+    function publish(string memory _hash) public onlyOwner {
         uint size = _pubItems.length;
-        _pubItems.push(PubItem(block.timestamp, _message));
-        console.log("Account %s published item %d: %s.", msg.sender, size, _message);
+        _pubItems.push(PubItem(block.timestamp, _hash));
+        console.log("Account %s published item %d: %s.", msg.sender, size, _hash);
         emit NewPubItem(size);
     }
 
