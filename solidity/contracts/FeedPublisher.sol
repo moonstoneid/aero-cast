@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.12;
 
 import "hardhat/console.sol";
 
@@ -11,8 +11,9 @@ contract FeedPublisher is Ownable {
     event NewPubItem(uint indexed num);
 
     struct PubItem {
+        uint num;
         uint timestamp;
-        string hash; // First 7 chars of a SHA3(guid) hash, just like Git short hashes
+        string data;
     }
 
     PubItem[] private _pubItems;
@@ -21,10 +22,10 @@ contract FeedPublisher is Ownable {
         
     }
 
-    function publish(string memory _hash) public onlyOwner {
+    function publish(string memory data) public onlyOwner {
         uint size = _pubItems.length;
-        _pubItems.push(PubItem(block.timestamp, _hash));
-        console.log("Account %s published item %d: %s.", msg.sender, size, _hash);
+        _pubItems.push(PubItem(size, block.timestamp, data));
+        console.log("Account %s published item %d: '%s'", msg.sender, size, data);
         emit NewPubItem(size);
     }
 
@@ -32,12 +33,12 @@ contract FeedPublisher is Ownable {
         return _pubItems.length;
     }
 
-    function getPubItem(uint _num) public view returns (PubItem memory) {
+    function getPubItem(uint num) public view returns (PubItem memory) {
         require(
-            _num < _pubItems.length,
+            num < _pubItems.length,
             "Pub item does not exist!"
         );
-        return _pubItems[_num];
+        return _pubItems[num];
     }
 
 }

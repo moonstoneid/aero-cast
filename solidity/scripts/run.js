@@ -1,8 +1,10 @@
 const hre = require("hardhat");
-const utils = hre.ethers.utils;
 
 const pubContractMeta = require('../artifacts/contracts/FeedPublisher.sol/FeedPublisher.json');
 const subContractMeta = require('../artifacts/contracts/FeedSubscriber.sol/FeedSubscriber.json');
+
+const RATING_LIKED = 0;
+const RATING_DISLIKED = 1;
 
 async function main() {
   // Get signers
@@ -19,28 +21,35 @@ async function main() {
   // Create subscriber
   const subContr = await createSubscriber(regContr, sub);
 
+  // Listen for publisher events
+  pubContr.on("NewPubItem", (itemNum) => {
+    console.log(`New item ${itemNum} has been published.`);
+  });
+  // Listen for subscriberer events
+  subContr.on("CreateSubscription", (pubAddr) => {
+    console.log(`Subscription on ${pubAddr} has been created.`);
+  });
+  subContr.on("CreateReaction", (pubAddr, pubItemNum) => {
+    console.log(`Reaction on ${pubAddr}/${pubItemNum} has been created.`);
+  });
+
   // Subscribe
   await subContr.connect(sub).subscribe(pubContr.address);
 
-  // Listen for publish events
-  pubContr.on("NewPubItem", (num) => {
-    console.log(`New item ${num} has been published.`);
-  });
+  // Get subscriptions
+  getSubscriptions(subContr);
 
   // Publish
-  let hash1 = utils.keccak256(utils.toUtf8Bytes("Hello!")).substring(0,9);
-  let hash2 = utils.keccak256(utils.toUtf8Bytes("Servus!")).substring(0,9);
-
-  await pubContr.connect(pub).publish(hash1);
-  await pubContr.connect(pub).publish(hash2);
+  await pubContr.connect(pub).publish("Hello!");
+  await pubContr.connect(pub).publish("Servus!");
 
   // React to item 0 and 1
-  await subContr.connect(sub).reactToPubItem(pubContr.address, hash1, 1); // Enums are treated as unit
-  await subContr.connect(sub).reactToPubItem(pubContr.address, hash2, 2); // Enums are treated as unit
+  // (Enums are treated as uint)
+  await subContr.connect(sub).react(pubContr.address, 0, RATING_DISLIKED); 
+  await subContr.connect(sub).react(pubContr.address, 1, RATING_LIKED);
 
-  // Get reactions for publisher
-  let reactionArray = await subContr.connect(sub).getReactions(pubContr.address);
-  console.log(reactionArray);
+  // Get reactions
+  getReactions(subContr);
 }
 
 async function createRegistry(main) {
@@ -68,6 +77,22 @@ async function createSubscriber(regContr, sub) {
   console.log(`Sub contract address: ${contrAddr}`);
 
   return new hre.ethers.Contract(contrAddr, subContractMeta.abi, sub);
+}
+
+async function getSubscriptions(subContr) {
+  const subscriptions = await subContr.getSubscriptions();
+  console.log("Subscriptions:");
+  for (let s of subscriptions) {
+    console.log(`- pubAddress: ${s.pubAddress}, timestamp: ${s.timestamp}`);
+  }
+}
+
+async function getReactions(subContr) {
+  const reactions = await subContr.getReactions();
+  console.log("Reactions:");
+  for (let r of reactions) {
+    console.log(`- pubAddress: ${r.pubAddress}, pubItemNum: ${r.pubItemNum}, timestamp: ${r.timestamp}`);
+  }
 }
 
 main().catch((error) => {
