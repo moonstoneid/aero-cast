@@ -33,13 +33,13 @@ contract FeedSubscriber is Ownable {
 
     // Array to store subscriptions
     Subscription[] private _subs;
-    // Mapping find subscriptions faster
+    // Mapping to find subscriptions faster
     // Key: uint('pub addr')
     mapping (uint160 => uint) private _subRefs;
 
     // Array to store reactions
     Reaction[] private _reacts;
-    // Mapping find reactions faster
+    // Mapping to find reactions faster
     // Key: Bitwise OR of uint('pub addr') and uint('pub item num')
     mapping (uint160 => uint) private _reactRefs;
 
@@ -170,7 +170,7 @@ contract FeedSubscriber is Ownable {
     }
 
     function calcReactionKey(address pubAddr, uint pubItemNum) internal pure returns (uint160) {
-        return createAddrKey(pubAddr) | createNumKey(pubItemNum);
+        return createAddrKey(pubAddr) << 16 | createNumKey(pubItemNum);
     }
 
     function createAddrKey(address addr) internal pure returns (uint160) {
