@@ -1,0 +1,23 @@
+<div>
+    <h1>Demo publisher</h1>
+    <h2>Add entry</h2>
+    <form action="#" th:action="@{/feed/create}" th:object="${item}" method="post">
+        <p>Title: <input type="text" th:field="*{title}" /></p>
+        <p>Description: <input type="text" th:field="*{description}" /></p>
+        <p><input type="submit" value="Submit" /></p>
+    </form>
+    <h2>Existing entries</h2>
+
+    <table border="1">
+        <tr>
+            <th>Pub Date</th>
+            <th>Title</th>
+            <th>Description</th>
+        </tr>
+        <tr th:each="item: ${items}">
+            <td th:text="${item.pubDate}" />
+            <td th:text="${item.title}" />
+            <td th:text="${item.description}" /><br>
+        </tr>
+    </table>
+</div>
