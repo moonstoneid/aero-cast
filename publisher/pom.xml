@@ -15,6 +15,10 @@
 	<description>A simple Web App to publish to web3-feed</description>
 	<properties>
 		<java.version>17</java.version>
+		<web3j.version>4.9.2</web3j.version>
+		<h2.version>2.1.214</h2.version>
+		<rome.version>2.0.0</rome.version>
+		<lombok.version>1.18.26</lombok.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -32,19 +36,24 @@
 		<dependency>
 			<groupId>com.rometools</groupId>
 			<artifactId>rome</artifactId>
-			<version>2.0.0</version>
+			<version>${rome.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.26</version>
+			<version>${lombok.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<version>2.1.214</version>
+			<version>${h2.version}</version>
 			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.web3j</groupId>
+			<artifactId>core</artifactId>
+			<version>${web3j.version}</version>
 		</dependency>
 	</dependencies>
 
