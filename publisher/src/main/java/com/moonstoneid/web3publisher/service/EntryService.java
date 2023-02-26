@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EntryService {
@@ -17,6 +18,10 @@ public class EntryService {
 
     public List<DbItem> getAll() {
         return entryRepo.findAll();
+    }
+
+    public DbItem getItem(String id) {
+        return entryRepo.findById(id).get();
     }
 
     public void save(DbItem item) {

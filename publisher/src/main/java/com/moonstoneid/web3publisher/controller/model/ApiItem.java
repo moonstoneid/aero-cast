@@ -8,6 +8,7 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 public class ApiItem {
+    private Integer id;
     private String title;
     private String description;
     private OffsetDateTime pubDate;

@@ -3,10 +3,13 @@ package com.moonstoneid.web3publisher.controller;
 import com.moonstoneid.web3publisher.controller.model.ApiItem;
 import com.moonstoneid.web3publisher.repo.model.DbItem;
 import com.moonstoneid.web3publisher.service.EntryService;
+import com.rometools.rome.io.FeedException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -29,7 +32,13 @@ public class ViewController {
         return "index";
     }
 
-    @PostMapping("/feed/create")
+    @GetMapping("/feed/item/{id}")
+    public String getItem(@PathVariable String id, Model model) throws FeedException {
+        model.addAttribute("item", entryService.getItem(id));
+        return "item";
+    }
+
+    @PostMapping("/feed/item")
     public String createItem(@ModelAttribute ApiItem apiItem, Model model) {
         apiItem.setPubDate(OffsetDateTime.now());
         DbItem dbItem = toDbModel(apiItem);
@@ -50,6 +59,7 @@ public class ViewController {
 
     private static ApiItem toApiModel(DbItem dbItem) {
         ApiItem item = new ApiItem();
+        item.setId(dbItem.getId());
         item.setTitle(dbItem.getTitle());
         item.setDescription(dbItem.getDescription());
         item.setPubDate(dbItem.getPubDate());
