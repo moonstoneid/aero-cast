@@ -1,19 +1,21 @@
 package com.moonstoneid.web3publisher.service;
 
+import com.moonstoneid.web3publisher.eth.Publisher;
 import com.moonstoneid.web3publisher.repo.ItemRepo;
 import com.moonstoneid.web3publisher.repo.model.DbItem;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class EntryService {
     private final ItemRepo entryRepo;
+    private final Publisher pub;
 
-    public EntryService(ItemRepo repo) {
+    public EntryService(ItemRepo repo,  Publisher pub) {
         this.entryRepo = repo;
+        this.pub = pub;
     }
 
     public List<DbItem> getAll() {
@@ -24,9 +26,12 @@ public class EntryService {
         return entryRepo.findById(id).get();
     }
 
-    public void save(DbItem item) {
+    public void save(DbItem item, String url) {
         Assert.notNull(item, "item cannot be null");
-        entryRepo.save(item);
+        DbItem savedItem = entryRepo.save(item);
+
+        // Publish to web3
+        pub.publish(url + "/" + savedItem.getId());
     }
 
 }

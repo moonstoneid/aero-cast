@@ -4,12 +4,12 @@ import com.moonstoneid.web3publisher.controller.model.ApiItem;
 import com.moonstoneid.web3publisher.repo.model.DbItem;
 import com.moonstoneid.web3publisher.service.EntryService;
 import com.rometools.rome.io.FeedException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -39,10 +39,15 @@ public class ViewController {
     }
 
     @PostMapping("/feed/item")
-    public String createItem(@ModelAttribute ApiItem apiItem, Model model) {
+    public String createItem(@ModelAttribute ApiItem apiItem, Model model, HttpServletRequest request) {
         apiItem.setPubDate(OffsetDateTime.now());
         DbItem dbItem = toDbModel(apiItem);
-        entryService.save(dbItem);
+
+        // Get url
+        String url = request.getRequestURL().toString();
+        url = url.substring(0, url.indexOf("/feed/item"));
+        entryService.save(dbItem, url);
+
         List<DbItem> list = entryService.getAll();
         model.addAttribute("items", toApiModel(entryService.getAll()));
         model.addAttribute("item", new ApiItem());
