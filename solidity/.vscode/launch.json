@@ -11,7 +11,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "cwd": "${workspaceFolder}/solidity",
+            "cwd": "${workspaceFolder}",
             "program": "scripts/${fileBasename}"
         }
     ]
