@@ -1,6 +1,0 @@
-# Node
-/node_modules
-/build
-
-# Other
-/src/contract_meta.json
