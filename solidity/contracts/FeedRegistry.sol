@@ -21,8 +21,9 @@ contract FeedRegistry {
     /**
     * @notice Creates a new publisher contract
     **/
-    function setupPublisher() public {
+    function setupPublisher(string memory feedUrl) public {
         FeedPublisher c = new FeedPublisher();
+        c.setFeedUrl(feedUrl);
         c.setOwner(msg.sender);
         address ca = address(c);
         //console.log("Account %s created publisher contract %s.", msg.sender, ca);

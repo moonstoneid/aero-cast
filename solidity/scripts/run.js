@@ -17,7 +17,7 @@ async function main() {
   const regContr = await createRegistry(main);
 
   // Create publisher
-  const pubContr = await createPublisher(regContr, pub);
+  const pubContr = await createPublisher(regContr, pub, "http://example.com");
   // Create subscriber
   const subContr = await createSubscriber(regContr, sub);
 
@@ -59,8 +59,8 @@ async function createRegistry(main) {
   return contr;
 }
 
-async function createPublisher(regContr, pub) {
-  const setupTxn = await regContr.connect(pub).setupPublisher();
+async function createPublisher(regContr, pub, feedUrl) {
+  const setupTxn = await regContr.connect(pub).setupPublisher(feedUrl);
   await setupTxn.wait();
 
   const contrAddr = await regContr.connect(pub).getPublisherContract();

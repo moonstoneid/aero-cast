@@ -16,10 +16,20 @@ contract FeedPublisher is Ownable {
         string data;
     }
 
+    string private _feedUrl;
     PubItem[] private _pubItems;
     
     constructor() {
         
+    }
+
+    function setFeedUrl(string memory feedUrl) public onlyOwner {
+        _feedUrl = feedUrl;
+        console.log("Account %s set feed URL: '%s'", msg.sender, _feedUrl);
+    }
+
+    function getFeedUrl() public view returns (string memory) {
+        return _feedUrl;
     }
 
     function publish(string memory data) public onlyOwner {
