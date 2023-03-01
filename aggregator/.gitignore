@@ -1,0 +1,18 @@
+# IntelliJ project files
+/.idea
+*.iml
+!/.idea/runConfigurations/App.xml
+
+# Eclipse project files
+/.settings
+.classpath
+.project
+
+# VS Code project files
+/.vscode
+
+# Build files
+/target
+
+# H2 Database file
+/database.mv.db
