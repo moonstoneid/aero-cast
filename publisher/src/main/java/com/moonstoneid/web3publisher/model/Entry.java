@@ -1,4 +1,4 @@
-package com.moonstoneid.web3publisher.repo.model;
+package com.moonstoneid.web3publisher.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,7 +13,7 @@ import java.time.OffsetDateTime;
 @Data
 @Entity
 @Table(name = "entry")
-public class DbItem {
+public class Entry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

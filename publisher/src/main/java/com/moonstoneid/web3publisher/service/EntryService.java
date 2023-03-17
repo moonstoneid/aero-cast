@@ -1,37 +1,40 @@
 package com.moonstoneid.web3publisher.service;
 
+import java.util.List;
+
 import com.moonstoneid.web3publisher.eth.Publisher;
-import com.moonstoneid.web3publisher.repo.ItemRepo;
-import com.moonstoneid.web3publisher.repo.model.DbItem;
+import com.moonstoneid.web3publisher.repo.EntryRepo;
+import com.moonstoneid.web3publisher.model.Entry;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.util.List;
-
 @Service
 public class EntryService {
-    private final ItemRepo entryRepo;
-    private final Publisher pub;
 
-    public EntryService(ItemRepo repo,  Publisher pub) {
-        this.entryRepo = repo;
-        this.pub = pub;
+    private final EntryRepo entryRepo;
+    private final Publisher publisher;
+
+    public EntryService(EntryRepo entryRepo, Publisher publisher) {
+        this.entryRepo = entryRepo;
+        this.publisher = publisher;
     }
 
-    public List<DbItem> getAll() {
+    public List<Entry> getAllEntries() {
         return entryRepo.findAll();
     }
 
-    public DbItem getItem(String id) {
+    public Entry getEntry(String id) {
         return entryRepo.findById(id).get();
     }
 
-    public void save(DbItem item, String url) {
-        Assert.notNull(item, "item cannot be null");
-        DbItem savedItem = entryRepo.save(item);
+    public void saveEntry(String url, Entry entry) {
+        Assert.notNull(entry, "url cannot be null");
+        Assert.notNull(entry, "entry cannot be null");
+
+        Entry savedEntry = entryRepo.save(entry);
 
         // Publish to web3
-        pub.publish(url + "/" + savedItem.getId());
+        publisher.publish(url + "/" + savedEntry.getId());
     }
 
 }

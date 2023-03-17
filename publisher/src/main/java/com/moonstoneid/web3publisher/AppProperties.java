@@ -15,8 +15,9 @@ public class AppProperties {
     @Setter
     public static class Eth {
         private EthApi api;
-        private String privatekey;
-        private String contractaddress;
+        private String privateKey;
+        private String regContractAddress;
+        private String pubContractAddress;
     }
 
     @Getter

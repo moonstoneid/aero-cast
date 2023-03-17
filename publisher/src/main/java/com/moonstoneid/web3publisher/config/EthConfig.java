@@ -1,4 +1,4 @@
-package com.moonstoneid.web3publisher.eth;
+package com.moonstoneid.web3publisher.config;
 
 import com.moonstoneid.web3publisher.AppProperties;
 import org.springframework.context.annotation.Bean;
@@ -8,6 +8,7 @@ import org.web3j.protocol.http.HttpService;
 
 @Configuration
 public class EthConfig {
+
     private final AppProperties appProperties;
 
     public EthConfig(AppProperties appProperties) {

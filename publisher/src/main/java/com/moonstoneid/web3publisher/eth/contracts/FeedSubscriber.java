@@ -1,4 +1,4 @@
-package com.moonstoneid.web3publisher.eth.wrapper;
+package com.moonstoneid.web3publisher.eth.contracts;
 
 import io.reactivex.Flowable;
 import io.reactivex.functions.Function;
