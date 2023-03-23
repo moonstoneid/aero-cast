@@ -4,7 +4,8 @@ import subContractMeta from "/abi/FeedSubscriber.json" assert { type: "json" };
 const subscribeButtonHandler = function() {
     const connected = connectWallet();
     if (connected) {
-        subscribe(PUB_CONTRACT_ADDRESS);
+        isSubscribed(PUB_CONTRACT_ADDRESS);
+      //  subscribe(PUB_CONTRACT_ADDRESS);
     }
 }
 
@@ -47,6 +48,54 @@ async function subscribe(pubContractAddr) {
     try {
         const subContract = getSubContract(subContractAddr);
         await subContract.subscribe(pubContractAddr);
+        subscribeButton.textContent = '\u2705 Subscribed. Click to unsubscribe.';
+    } catch (error) {
+        console.log("Could not create subscription: ", error);
+    }
+}
+
+async function isSubscribed(pubContractAddr) {
+    let subContractAddr;
+    try {
+        const regContract = getRegContract();
+        subContractAddr = await regContract.getSubscriberContract();
+    } catch (error) {
+        console.log("Could not get subscriber contract address: ", error);
+        return;
+    }
+    if (!subContractAddr) {
+        console.log("No subscriber contract exists!");
+        return;
+    }
+
+    try {
+        const subContract = getSubContract("0xB7A5bd0345EF1Cc5E66bf61BdeC17D2461fBd968");
+        await subContract.getSubscriptions();
+        console.log("test");
+    } catch (error) {
+        console.log("Could not get subs: ", error);
+    }
+}
+
+
+async function unsubscribe(pubContractAddr) {
+    let subContractAddr;
+    try {
+        const regContract = getRegContract();
+        subContractAddr = await regContract.getSubscriberContract();
+    } catch (error) {
+        console.log("Could not get subscriber contract address: ", error);
+        return;
+    }
+    if (!subContractAddr) {
+        console.log("No subscriber contract exists!");
+        return;
+    }
+
+    try {
+        const subContract = getSubContract(subContractAddr);
+        await subContract.unsubscribe(pubContractAddr);
+        subscribeButton.textContent = '\u1F50C Unsubscribed. Click to subscribe.';
     } catch (error) {
         console.log("Could not create subscription: ", error);
     }

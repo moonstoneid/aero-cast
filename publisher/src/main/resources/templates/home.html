@@ -1,10 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
 <div>
     <h1>Demo publisher</h1>
     <h2>Add entry</h2>
     <form action="#" th:action="@{/feed/entry}" th:object="${entry}" method="post">
-        <p>Title: <input type="text" th:field="*{title}" /></p>
-        <p>Description: <input type="text" th:field="*{description}" /></p>
-        <p><input type="submit" value="Submit" /></p>
+        <p>Title: <input type="text" th:field="*{title}"/></p>
+        <p>Description: <input type="text" th:field="*{description}"/></p>
+        <p><input type="submit" value="Submit"/></p>
     </form>
 
     <button id="subscribe-button">Subscribe</button>
@@ -19,17 +25,20 @@
             <th>Link</th>
         </tr>
         <tr th:each="entry: ${entries}">
-            <td th:text="${entry.pubDate}" />
-            <td th:text="${entry.title}" />
-            <td th:text="${entry.description}" />
-            <td><a th:text="'/feed/entry/'+${entry.id}" th:href="'/feed/entry/'+${entry.id}" /></td>
+            <td th:text="${entry.pubDate}"/>
+            <td th:text="${entry.title}"/>
+            <td th:text="${entry.description}"/>
+            <td><a th:text="'/feed/entry/'+${entry.id}" th:href="'/feed/entry/'+${entry.id}"/></td>
         </tr>
     </table>
 </div>
 
 <script th:inline="javascript">
-    const REG_CONTRACT_ADDRESS = [[${regContractAddr}]];
-    const PUB_CONTRACT_ADDRESS = [[${pubContractAddr}]];
+        const REG_CONTRACT_ADDRESS = [[${regContractAddr}]];
+        const PUB_CONTRACT_ADDRESS = [[${pubContractAddr}]];
+
 </script>
 <script type="text/javascript" src="/js/ethers.js"></script>
 <script type="module" src="/js/home.js"></script>
+</body>
+</html>
