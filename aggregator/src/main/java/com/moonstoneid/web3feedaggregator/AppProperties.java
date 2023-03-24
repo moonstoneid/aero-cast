@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix = "web3feedaggregator")
+@ConfigurationProperties(prefix = "aggregator")
 @Getter
 @Setter
 public class AppProperties {
@@ -15,6 +15,7 @@ public class AppProperties {
     @Setter
     public static class Eth {
         private EthApi api;
+        private String regContractAddress;
     }
 
     @Getter
