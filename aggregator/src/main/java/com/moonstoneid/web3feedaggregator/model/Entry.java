@@ -35,6 +35,9 @@ public class Entry {
     @Column(name = "date", nullable = false)
     private OffsetDateTime date;
 
+    @Column(name = "url", length = 2000, nullable = false)
+    private String url;
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor

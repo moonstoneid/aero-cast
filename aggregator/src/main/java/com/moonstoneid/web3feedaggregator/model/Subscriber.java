@@ -16,6 +16,9 @@ import lombok.Data;
 public class Subscriber {
 
     @Id
+    @Column(name = "account_address", length = 42, nullable = false)
+    private String accountAddress;
+
     @Column(name = "contract_address", length = 42, nullable = false)
     private String contactAddress;
 

@@ -1,7 +1,7 @@
 import { createApp } from "/js/vue.js";
 
 const appTmpl = `
-<h1>Demo aggregator</h1>
+<h1>Demo Aggregator</h1>
 
 <p v-if="error != null">{{ error }}</p>
 
@@ -10,12 +10,12 @@ const appTmpl = `
   <button v-on:click="$event => handleConnectWallet()">Connect</button>
 </div>
 
-<div v-if="account !== null && !hasUserEnrolled">
-  <p>You are currently not enrolled.</p>
-  <button v-on:click="$event => handleEnrollUser()">Enroll</button>
+<div v-if="account !== null && !hasRegistered">
+  <p>You are currently not registered.</p>
+  <button v-on:click="$event => handleRegister()">Register</button>
 </div>
 
-<div v-if="account !== null && hasUserEnrolled">
+<div v-if="account !== null && hasRegistered">
   <p>Here is your latest feed.</p>
   <table border="1">
     <tr>
@@ -32,22 +32,23 @@ const appTmpl = `
     </tr>
   </table>
 </div>
+
+<div v-if="account !== null && hasRegistered">
+  <button v-on:click="$event => handleUnregister()">Unregister</button>
+</div>
 `;
 
 const { ethereum } = window;
 
 const getAccount = async function() {
     if (!ethereum) {
-        console.log("Make sure you have MetaMask!");
-        // TODO: Throw exception
-        return null;
+        throw new Error("Make sure you have MetaMask!");
     }
 
     try {
         const accounts = await ethereum.request({ method: "eth_accounts" });
-
         if (accounts.length === 0) {
-            console.log("No authorized account found!");
+            console.log("No account is connected.");
             return null;
         }
 
@@ -56,17 +57,15 @@ const getAccount = async function() {
         return account
     } catch (error) {
         console.log(error);
-        // TODO: Throw exception
-        return null;
+        throw new Error("Could not retrieve Ethereum account!");
     }
 };
 
 const requestAccount = async function() {
     try {
         const accounts = await ethereum.request({ method: "eth_requestAccounts" });
-
         if (accounts.length === 0) {
-            console.log("No authorized account found!");
+            console.log("No account was connected!");
             return null;
         }
 
@@ -75,23 +74,55 @@ const requestAccount = async function() {
         return account
     } catch (error) {
         console.log(error)
-        // TODO: Throw exception
-        return null;
+        throw new Error("Could not connect Ethereum account!");
     }
 };
 
-const fetchHasUserEnrolled = async function() {
-    // TODO: Implement
-    return false;
+const fetchHasRegistered = async function(account) {
+    const response = await fetch("/subscriber/" + account);
+    if (response.ok) {
+        return true;
+    }
+    if (response.status === 404) {
+        return false;
+    }
+    throw new Error("A unknown error occurred!");
 }
 
-const enrollUser = async function(account) {
-    // TODO: Implement
+const register = async function(account) {
+    const response = await fetch("/subscriber/" + account, {
+        method: "POST"
+    });
+    if (response.ok) {
+        return;
+    }
+    if (response.status === 404) {
+        throw new Error("The subscriber account was not found!");
+    } else {
+        throw new Error("A unknown error occurred!");
+    }
 }
 
-const fetchEntries = async function() {
-    // TODO: Implement
-    return [];
+const unregister = async function(account) {
+    const response = await fetch("/subscriber/" + account, {
+        method: "DELETE"
+    });
+    if (response.ok || response.status === 404) {
+        return;
+    }
+    throw new Error("A unknown error occurred!");
+}
+
+const fetchEntries = async function(account) {
+    const response = await fetch("/subscriber/" + account + "/entries");
+    if (response.ok) {
+        return response.json();
+    }
+    if (response.status === 404) {
+        throw new Error("The subscriber account was not found!");
+    } else {
+        throw new Error("A unknown error occurred!");
+    }
 }
 
 createApp({
@@ -100,7 +131,7 @@ createApp({
         return {
             error: null,
             account: null,
-            hasUserEnrolled: false,
+            hasRegistered: false,
             entries: []
         };
     },
@@ -111,11 +142,11 @@ createApp({
             if (this.account === null) {
                 return;
             }
-            this.hasUserEnrolled = await fetchHasUserEnrolled();
-            if (!this.hasUserEnrolled) {
+            this.hasRegistered = await fetchHasRegistered(this.account);
+            if (!this.hasRegistered) {
                 return;
             }
-            this.entries = await fetchEntries();
+            this.entries = await fetchEntries(this.account);
         } catch (e) {
             this.error = e;
         }
@@ -129,11 +160,22 @@ createApp({
                 this.error = e;
             }
         },
-        async handleEnrollUser() {
+        async handleRegister() {
             this.error = null;
             try {
-                await enrollUser(this.account);
-                this.hasUserEnrolled = true;
+                await register(this.account);
+                this.hasRegistered = true;
+                this.entries = await fetchEntries(this.account);
+            } catch (e) {
+                this.error = e;
+            }
+        },
+        async handleUnregister() {
+            this.error = null;
+            try {
+                await unregister(this.account);
+                this.hasRegistered = false;
+                this.entries = [];
             } catch (e) {
                 this.error = e;
             }

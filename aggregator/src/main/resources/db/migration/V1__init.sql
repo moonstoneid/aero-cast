@@ -5,8 +5,10 @@ CREATE TABLE publisher (
 );
 
 CREATE TABLE subscriber (
+  account_address VARCHAR(42) NOT NULL,
   contract_address VARCHAR(42) NOT NULL,
-  PRIMARY KEY (contract_address)
+  PRIMARY KEY (account_address),
+  UNIQUE (contract_address)
 );
 
 CREATE TABLE subscription (
@@ -25,6 +27,7 @@ CREATE TABLE entry (
   title VARCHAR(200) NOT NULL,
   description VARCHAR(2000) NOT NULL,
   date TIMESTAMP NOT NULL,
+  url VARCHAR(2000) NOT NULL,
   PRIMARY KEY (pub_contract_address, number),
   CONSTRAINT fk_entry_publisher FOREIGN KEY (pub_contract_address)
     REFERENCES publisher (contract_address) ON DELETE CASCADE ON UPDATE CASCADE
