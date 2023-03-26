@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "entry")
 @IdClass(Entry.EntryId.class)
-public class Entry {
+public class Entry implements Serializable {
 
     @Id
     @Column(name = "pub_contract_address", length = 42, nullable = false)

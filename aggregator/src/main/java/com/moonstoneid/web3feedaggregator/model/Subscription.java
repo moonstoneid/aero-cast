@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "subscription")
 @IdClass(Subscription.SubscriptionId.class)
-public class Subscription {
+public class Subscription implements Serializable {
 
     @Id
     @Column(name = "sub_contract_address", length = 42, nullable = false)

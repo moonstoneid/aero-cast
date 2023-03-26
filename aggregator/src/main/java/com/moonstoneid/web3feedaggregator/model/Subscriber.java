@@ -1,8 +1,11 @@
 package com.moonstoneid.web3feedaggregator.model;
 
+import java.io.Serializable;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
@@ -13,7 +16,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "subscriber")
-public class Subscriber {
+public class Subscriber implements Serializable {
 
     @Id
     @Column(name = "account_address", length = 42, nullable = false)
@@ -22,8 +25,9 @@ public class Subscriber {
     @Column(name = "contract_address", length = 42, nullable = false)
     private String contactAddress;
 
-    @OneToMany
-    @JoinColumn(name = "contract_address")
+    // TODO: This is a workaround to prevent LazyInitializationException, should be fixed for prod
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "sub_contract_address", referencedColumnName = "contract_address")
     private List<Subscription> subscriptions;
 
 }
