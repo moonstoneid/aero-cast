@@ -81,7 +81,7 @@ async function createSubscriber(regContr, sub) {
 
 async function getSubscriptions(subContr) {
   const subscriptions = await subContr.getSubscriptions();
-  console.log("Subscriptions:");
+  console.log(Date.now() + " Subscriptions:");
   for (let s of subscriptions) {
     console.log(`- pubAddress: ${s.pubAddress}, timestamp: ${s.timestamp}`);
   }

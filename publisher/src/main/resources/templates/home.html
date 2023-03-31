@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div>
+    <h1>Demo publisher</h1>
+
+    <p id="issubscribed-paragraph"></p>
+    <button id="subscribe-button">Subscribe</button>
+    <button id="unsubscribe-button">Unsubscribe</button>
+
+    <hr style="width:50%;text-align:left;margin-left:0">
+
+    <h2>Add entry</h2>
+    <form action="#" th:action="@{/feed/entry}" th:object="${entry}" method="post">
+        <p>Title: <input type="text" th:field="*{title}"/></p>
+        <p>Description: <input type="text" th:field="*{description}"/></p>
+        <p><input type="submit" value="Submit"/></p>
+    </form>
+
+    <hr style="width:50%;text-align:left;margin-left:0">
+
+    <h2>Existing entries</h2>
+
+    <table border="1">
+        <tr>
+            <th>Pub Date</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Link</th>
+        </tr>
+        <tr th:each="entry: ${entries}">
+            <td th:text="${entry.pubDate}"/>
+            <td th:text="${entry.title}"/>
+            <td th:text="${entry.description}"/>
+            <td><a th:text="'/feed/entry/'+${entry.id}" th:href="'/feed/entry/'+${entry.id}"/></td>
+        </tr>
+    </table>
+</div>
+
+<script th:inline="javascript">
+        const REG_CONTRACT_ADDRESS = [[${regContractAddr}]];
+        const PUB_CONTRACT_ADDRESS = [[${pubContractAddr}]];
+
+</script>
+<script type="text/javascript" src="/js/ethers.js"></script>
+<script type="module" src="/js/home.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+1. Start hardhat node on localhost:
+npx hardhat node // starts a hardhat node on port 8545
+
+2. Add network in run command:
+npx hardhat run --network localhost .\scripts\run.js
+
+3. Java publisher will also use http://localhost:8545
