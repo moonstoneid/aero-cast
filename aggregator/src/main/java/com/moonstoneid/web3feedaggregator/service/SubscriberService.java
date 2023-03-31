@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.moonstoneid.web3feedaggregator.error.NotFoundException;
-import com.moonstoneid.web3feedaggregator.eth.EthEventListener;
+import com.moonstoneid.web3feedaggregator.eth.EthSubscriberEventListener;
 import com.moonstoneid.web3feedaggregator.eth.EthService;
 import com.moonstoneid.web3feedaggregator.eth.contracts.FeedSubscriber;
 import com.moonstoneid.web3feedaggregator.model.Entry;
@@ -14,6 +14,8 @@ import com.moonstoneid.web3feedaggregator.model.Subscriber;
 import com.moonstoneid.web3feedaggregator.model.Subscription;
 import com.moonstoneid.web3feedaggregator.repo.EntryRepo;
 import com.moonstoneid.web3feedaggregator.repo.SubscriberRepo;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,18 +27,23 @@ public class SubscriberService {
     private final PublisherService publisherService;
 
     private final EthService ethService;
-    private final EthEventListener ethEventListener;
+    private final EthSubscriberEventListener ethEventListener;
 
     public SubscriberService(SubscriberRepo subscriberRepo, EntryRepo entryRepo,
-            PublisherService publisherService, EthService ethService,
-            EthEventListener ethEventListener) {
+            PublisherService publisherService, EthService ethService) {
         this.subscriberRepo = subscriberRepo;
         this.entryRepo = entryRepo;
 
         this.publisherService = publisherService;
 
         this.ethService = ethService;
-        this.ethEventListener = ethEventListener;
+        this.ethEventListener = new EthSubscriberEventListener(this, ethService.getWeb3j());
+    }
+
+    // Register listeners after Spring Boot has started
+    @EventListener(ApplicationReadyEvent.class)
+    public void initEventListener() {
+        ethEventListener.registerSubscriberEventListeners();
     }
 
     public List<Subscriber> getSubscribers() {

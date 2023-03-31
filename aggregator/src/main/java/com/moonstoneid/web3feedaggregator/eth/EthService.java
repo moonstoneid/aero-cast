@@ -16,6 +16,10 @@ public class EthService {
         this.web3j = web3j;
     }
 
+    public Web3j getWeb3j() {
+        return web3j;
+    }
+
     public String getSubscriberContractAddress(String accountAddress) {
         // TODO!!!
         return null;

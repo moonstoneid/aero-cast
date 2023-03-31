@@ -2,16 +2,10 @@ package com.moonstoneid.web3feedaggregator.eth;
 
 import java.util.Optional;
 
-import com.moonstoneid.web3feedaggregator.eth.contracts.FeedPublisher;
 import com.moonstoneid.web3feedaggregator.eth.contracts.FeedSubscriber;
-import com.moonstoneid.web3feedaggregator.model.Publisher;
 import com.moonstoneid.web3feedaggregator.model.Subscriber;
-import com.moonstoneid.web3feedaggregator.service.PublisherService;
 import com.moonstoneid.web3feedaggregator.service.SubscriberService;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Service;
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.datatypes.Event;
 import org.web3j.protocol.Web3j;
@@ -19,28 +13,17 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.Log;
 
-@Service
-public class EthEventListener {
+public class EthSubscriberEventListener {
 
     private final SubscriberService subscriberService;
-    private final PublisherService publisherService;
     private final Web3j web3j;
 
-    public EthEventListener(SubscriberService subscriberService, PublisherService publisherService,
-            Web3j web3j) {
+    public EthSubscriberEventListener(SubscriberService subscriberService, Web3j web3j) {
         this.web3j = web3j;
         this.subscriberService = subscriberService;
-        this.publisherService = publisherService;
     }
 
-    // Register listeners after Spring Boot has started
-    @EventListener(ApplicationReadyEvent.class)
-    public void registerListeners() {
-        registerSubscriberEventListeners();
-        registerPublisherEventListeners();
-    }
-
-    private void registerSubscriberEventListeners() {
+    public void registerSubscriberEventListeners() {
         subscriberService.getSubscribers().forEach(this::registerSubscriberEventListener);
     }
 
@@ -87,25 +70,6 @@ public class EthEventListener {
     }
 
     public void unregisterSubscriberEventListener(Subscriber subscriber) {
-        // TODO!!!
-    }
-
-    private void registerPublisherEventListeners() {
-        publisherService.getPublishers().forEach(this::registerPublisherEventListener);
-    }
-
-    public void registerPublisherEventListener(Publisher publisher) {
-        String contractAddress = publisher.getContractAddress();
-
-        EthFilter subFilter = createFilter(contractAddress, FeedPublisher.NEWPUBITEM_EVENT);
-        web3j.ethLogFlowable(subFilter).subscribe(l -> onCreateSubscriptionEvent(contractAddress, l));
-    }
-
-    private void onNewPubItemEvent(String pubAddress, Log log) {
-        // TODO: Fetch publisher item
-    }
-
-    public void unregisterPublisherEventListener(Publisher publisher) {
         // TODO!!!
     }
 
