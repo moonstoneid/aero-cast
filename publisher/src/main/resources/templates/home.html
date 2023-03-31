@@ -6,6 +6,13 @@
 <body>
 <div>
     <h1>Demo publisher</h1>
+
+    <p id="issubscribed-paragraph"></p>
+    <button id="subscribe-button">Subscribe</button>
+    <button id="unsubscribe-button">Unsubscribe</button>
+
+    <hr style="width:50%;text-align:left;margin-left:0">
+
     <h2>Add entry</h2>
     <form action="#" th:action="@{/feed/entry}" th:object="${entry}" method="post">
         <p>Title: <input type="text" th:field="*{title}"/></p>
@@ -13,7 +20,7 @@
         <p><input type="submit" value="Submit"/></p>
     </form>
 
-    <button id="subscribe-button">Subscribe</button>
+    <hr style="width:50%;text-align:left;margin-left:0">
 
     <h2>Existing entries</h2>
 
