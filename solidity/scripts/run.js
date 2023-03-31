@@ -50,14 +50,6 @@ async function main() {
 
   // Get reactions
   getReactions(subContr);
-
-  printSubscribers(subContr);
-}
-
-function printSubscribers(subContr) {         //  create a loop function
-  setInterval(()=> {
-      getSubscriptions(subContr);
-  }, 3000)
 }
 
 async function createRegistry(main) {
