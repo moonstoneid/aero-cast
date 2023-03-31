@@ -1,15 +1,17 @@
-import regContractMeta from "/abi/FeedRegistry.json" assert { type: "json" };
-import subContractMeta from "/abi/FeedSubscriber.json" assert { type: "json" };
+import regContractMeta from "/abi/FeedRegistry.json" assert {type: "json"};
+import subContractMeta from "/abi/FeedSubscriber.json" assert {type: "json"};
 
-const subscribeButtonHandler = function() {
+const subscribeButtonHandler = function () {
     const connected = connectWallet();
+
     if (connected) {
         subscribe(PUB_CONTRACT_ADDRESS);
     }
 }
 
-const unsubscribeButtonHandler = function() {
+const unsubscribeButtonHandler = function () {
     const connected = connectWallet();
+
     if (connected) {
         unsubscribe(PUB_CONTRACT_ADDRESS);
     }
@@ -21,23 +23,21 @@ const isSubscribedParagraph = document.getElementById('issubscribed-paragraph');
 subscribeButton && subscribeButton.addEventListener('click', subscribeButtonHandler, false);
 unsubscribeButton && unsubscribeButton.addEventListener('click', unsubscribeButtonHandler, false);
 
-document.addEventListener("DOMContentLoaded", function(){
+document.addEventListener("DOMContentLoaded", function () {
     const connected = connectWallet();
     if (connected) {
-        if(isSubscribed(PUB_CONTRACT_ADDRESS)){
+        if (isSubscribed(PUB_CONTRACT_ADDRESS)) {
             setIsSubscribed();
-        }
-        else {
+        } else {
             setIsUnSubscribed();
         }
-    }
-    else{
+    } else {
         // Show connect button
     }
 });
 
 async function connectWallet() {
-    const { ethereum } = window;
+    const {ethereum} = window;
 
     if (!ethereum) {
         console.log("Get MetaMask!");
@@ -45,7 +45,7 @@ async function connectWallet() {
     }
 
     try {
-        const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+        const accounts = await ethereum.request({method: "eth_requestAccounts"});
         const account = accounts[0];
         console.log("Connected account: ", account);
         return true;
@@ -86,23 +86,23 @@ async function isSubscribed(pubContractAddr) {
         subContractAddr = await regContract.getSubscriberContract();
     } catch (error) {
         console.log("Could not get subscriber contract address: ", error);
-        return;
+        return isSubscribed;
     }
     if (!subContractAddr) {
         console.log("No subscriber contract exists!");
-        return;
+        return isSubscribed;
     }
 
     try {
-        const subContract = getSubContract("0xB7A5bd0345EF1Cc5E66bf61BdeC17D2461fBd968");
+        const subContract = getSubContract(subContractAddr);
         const subscriptions = await subContract.getSubscriptions();
 
 
         for (let s of subscriptions) {
-          if(s.pubAddress.toLowerCase() === pubContractAddr.toLowerCase()) {
-            isSubscribed = true;
-            break;
-          }
+            if (s.pubAddress.toLowerCase() === pubContractAddr.toLowerCase()) {
+                isSubscribed = true;
+                break;
+            }
         }
     } catch (error) {
         console.log("Could not get subs: ", error);
@@ -143,19 +143,19 @@ function getSubContract(subContractAddr) {
 }
 
 function getSigner() {
-    const { ethereum } = window;
+    const {ethereum} = window;
     const provider = new ethers.providers.Web3Provider(ethereum);
     return provider.getSigner();
 }
 
 function setIsSubscribed() {
-    subscribeButton.style.display= 'none';
-    unsubscribeButton.style.display= null;
+    subscribeButton.style.display = 'none';
+    unsubscribeButton.style.display = null;
     isSubscribedParagraph.innerText = '\u2705 You are subscribed to this publisher!';
 }
 
 function setIsUnSubscribed() {
-    subscribeButton.style.display= null;
-    unsubscribeButton.style.display= 'none';
+    subscribeButton.style.display = null;
+    unsubscribeButton.style.display = 'none';
     isSubscribedParagraph.innerText = '\u274C You are not subscribed to this publisher!';
 }
