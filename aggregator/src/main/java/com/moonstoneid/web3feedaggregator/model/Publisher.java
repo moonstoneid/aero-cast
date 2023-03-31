@@ -16,7 +16,7 @@ public class Publisher implements Serializable {
 
     @Id
     @Column(name = "contract_address", length = 42, nullable = false)
-    private String contactAddress;
+    private String contractAddress;
 
     @Column(name = "feed_url", length = 500, nullable = false)
     private String feedUrl;

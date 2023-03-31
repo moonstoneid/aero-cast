@@ -20,7 +20,7 @@ public class Entry implements Serializable {
 
     @Id
     @Column(name = "pub_contract_address", length = 42, nullable = false)
-    private String pubContactAddress;
+    private String pubContractAddress;
 
     @Id
     @Column(name = "number", nullable = false)
@@ -43,7 +43,7 @@ public class Entry implements Serializable {
     @AllArgsConstructor
     public static class EntryId implements Serializable {
 
-        private String pubContactAddress;
+        private String pubContractAddress;
         private Integer number;
 
     }

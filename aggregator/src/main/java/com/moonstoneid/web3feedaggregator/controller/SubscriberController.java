@@ -54,7 +54,7 @@ public class SubscriberController {
 
     private static SubscriberVM toViewModel(Subscriber subscriber) {
         SubscriberVM subscriberVM = new SubscriberVM();
-        subscriberVM.contractAddress = subscriber.getContactAddress();
+        subscriberVM.contractAddress = subscriber.getContractAddress();
         return subscriberVM;
     }
 

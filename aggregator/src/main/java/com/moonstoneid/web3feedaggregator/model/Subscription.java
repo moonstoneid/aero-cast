@@ -19,19 +19,19 @@ public class Subscription implements Serializable {
 
     @Id
     @Column(name = "sub_contract_address", length = 42, nullable = false)
-    private String subContactAddress;
+    private String subContractAddress;
 
     @Id
     @Column(name = "pub_contract_address", length = 42, nullable = false)
-    private String pubContactAddress;
+    private String pubContractAddress;
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     public static class SubscriptionId implements Serializable {
 
-        private String subContactAddress;
-        private String pubContactAddress;
+        private String subContractAddress;
+        private String pubContractAddress;
 
     }
 

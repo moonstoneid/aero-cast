@@ -23,7 +23,7 @@ public class Subscriber implements Serializable {
     private String accountAddress;
 
     @Column(name = "contract_address", length = 42, nullable = false)
-    private String contactAddress;
+    private String contractAddress;
 
     // TODO: This is a workaround to prevent LazyInitializationException, should be fixed for prod
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
