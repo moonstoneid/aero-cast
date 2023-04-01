@@ -17,11 +17,12 @@ public class PublisherService {
 
     private final EthService ethService;
     private final EthPublisherEventListener ethEventListener;
+    private EntryService entryservice;
 
-    public PublisherService(PublisherRepo publisherRepo, EthService ethService) {
-        this.publisherRepo = publisherRepo;
-
+    public PublisherService(PublisherRepo publisherRepo, EthService ethService, EntryService entryservice) {
+        this.entryservice = entryservice;
         this.ethService = ethService;
+        this.publisherRepo = publisherRepo;
         this.ethEventListener = new EthPublisherEventListener(this, ethService.getWeb3j());
     }
 
@@ -42,7 +43,7 @@ public class PublisherService {
         }
 
         publisher = new Publisher();
-        publisher.setContractAddress(address);
+        publisher.setContractAddress(address.toLowerCase());
         publisher.setFeedUrl(ethService.getPublisherFeedUrl(address));
         publisherRepo.save(publisher);
 
