@@ -56,6 +56,10 @@ public class PublisherService {
 
     public void removePublisher(String address) {
         // TODO: Cleanup publisher items
+        // Cleanup publisher entry items
+        entryservice.removeEntriesByPublisher(address);
+        publisherRepo.deleteById(address);
     }
 
 }
+

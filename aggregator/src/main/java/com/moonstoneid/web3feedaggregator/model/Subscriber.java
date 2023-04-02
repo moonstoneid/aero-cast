@@ -26,8 +26,10 @@ public class Subscriber implements Serializable {
     private String contractAddress;
 
     // TODO: This is a workaround to prevent LazyInitializationException, should be fixed for prod
+    // Added updatable = false to prevent Hibernate from updating the foreign key with null
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "sub_contract_address", referencedColumnName = "contract_address")
+    @JoinColumn(name = "sub_contract_address", referencedColumnName = "contract_address", updatable = false,
+            insertable = false)
     private List<Subscription> subscriptions;
 
 }

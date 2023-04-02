@@ -1,11 +1,14 @@
 package com.moonstoneid.web3feedaggregator.eth;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.moonstoneid.web3feedaggregator.AppProperties;
 import com.moonstoneid.web3feedaggregator.eth.contracts.FeedPublisher;
+import com.moonstoneid.web3feedaggregator.eth.contracts.FeedRegistry;
 import com.moonstoneid.web3feedaggregator.eth.contracts.FeedSubscriber;
+import com.moonstoneid.web3feedaggregator.model.Subscriber;
 import com.moonstoneid.web3feedaggregator.repo.SubscriberRepo;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
@@ -32,12 +35,24 @@ public class EthService {
     }
 
     public String getSubscriberContractAddress(String accountAddress) {
-       return subscriberRepo.getById(accountAddress).getContractAddress();
+        FeedRegistry contract = FeedRegistry.load(appProperties.getEth().getRegContractAddress(),
+                web3j, getCredentials(), contractGasProvider);
+        try {
+            return contract.getSubscriberContractByAddress(accountAddress).sendAsync().get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public List<FeedSubscriber.Subscription> getSubscriberSubscriptions(String contractAddress) {
-        // TODO!!!
-        return null;
+        // Use FeedSubscriber contract to get subscriptions
+        FeedSubscriber contract = FeedSubscriber.load(contractAddress, web3j, getCredentials(),
+                contractGasProvider);
+        try {
+            return contract.getSubscriptions().sendAsync().get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String getPublisherFeedUrl(String contractAddress) {

@@ -14,27 +14,28 @@ import com.moonstoneid.web3feedaggregator.model.Subscriber;
 import com.moonstoneid.web3feedaggregator.model.Subscription;
 import com.moonstoneid.web3feedaggregator.repo.EntryRepo;
 import com.moonstoneid.web3feedaggregator.repo.SubscriberRepo;
+import com.moonstoneid.web3feedaggregator.repo.SubscriptionRepo;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SubscriberService {
 
     private final SubscriberRepo subscriberRepo;
     private final EntryRepo entryRepo;
-
     private final PublisherService publisherService;
-
+    private final SubscriptionRepo subscriptionRepo;
     private final EthService ethService;
     private final EthSubscriberEventListener ethEventListener;
 
     public SubscriberService(SubscriberRepo subscriberRepo, EntryRepo entryRepo,
-            PublisherService publisherService, EthService ethService) {
+            PublisherService publisherService, EthService ethService, SubscriptionRepo subscriptionRepo) {
         this.subscriberRepo = subscriberRepo;
         this.entryRepo = entryRepo;
-
         this.publisherService = publisherService;
+        this.subscriptionRepo = subscriptionRepo;
 
         this.ethService = ethService;
         this.ethEventListener = new EthSubscriberEventListener(this, ethService.getWeb3j());
@@ -75,13 +76,15 @@ public class SubscriberService {
             Subscription subscription = new Subscription();
             subscription.setSubContractAddress(contractAddress);
             subscription.setPubContractAddress(publisher.getContractAddress());
+            subscriptions.add(subscription);
         }
 
         Subscriber subscriber = new Subscriber();
-        subscriber.setAccountAddress(address);
+        subscriber.setAccountAddress(address.toLowerCase());
+        subscriber.setContractAddress(contractAddress);
         subscriber.setSubscriptions(subscriptions);
-        subscriberRepo.save(subscriber);
 
+        subscriberRepo.save(subscriber);
         ethEventListener.registerSubscriberEventListener(subscriber);
     }
 
@@ -122,6 +125,7 @@ public class SubscriberService {
         subscriberRepo.save(subscriber);
     }
 
+
     public void removeSubscription(String address, String pubAddress) {
         // Get subscriber
         Subscriber subscriber = subscriberRepo.getById(address);
@@ -129,12 +133,17 @@ public class SubscriberService {
             return;
         }
 
-        // Update subscriber
-        subscriber.getSubscriptions()
-                .removeIf(s -> s.getPubContractAddress().equalsIgnoreCase(pubAddress));
+        subscriber.getSubscriptions().removeIf(s -> s.getPubContractAddress().equalsIgnoreCase(pubAddress));
+        if(subscriber.getSubscriptions().isEmpty()){
+            subscriber.setSubscriptions(null);
+            subscriptionRepo.deleteById(subscriber.getContractAddress(), pubAddress);
+        }
         subscriberRepo.save(subscriber);
 
-        // TODO: Cleanup publisher
+        // Check if no more subscriptions exist for publisher
+        if (!subscriptionsExist(pubAddress)) {
+            publisherService.removePublisher(pubAddress);
+        }
     }
 
     public List<Entry> getEntriesBySubscriberAccountAddress(String address) {
@@ -143,6 +152,14 @@ public class SubscriberService {
             throw new NotFoundException("Subscriber was not found!");
         }
         return entryRepo.findAllBySubscriberContractAddress(address);
+    }
+
+    private boolean subscriptionsExist(String pubAddress) {
+        return subscriberRepo.findAll()
+                .stream()
+                .anyMatch(o -> o.getSubscriptions()
+                        .stream()
+                        .anyMatch(s -> s.getPubContractAddress().equalsIgnoreCase(pubAddress)));
     }
 
 }
