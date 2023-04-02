@@ -59,4 +59,13 @@ contract FeedRegistry {
         return ca;
     }
 
+    /**
+* @notice Returns the sender's subscriber contract
+    **/
+    function getSubscriberContractByAddress(address addr) public view returns (address) {
+        address ca = subscriberContracts[addr];
+        //console.log("Account %s has subscriber contract %s.", msg.sender, ca);
+        return ca;
+    }
+
 }
