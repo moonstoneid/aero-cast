@@ -17,10 +17,12 @@ async function main() {
   const regContr = await createRegistry(main);
 
   // Create publisher
-  const pubContr = await createPublisher(regContr, pub, "http://example.com");
+  const pubContr = await createPublisher(regContr, pub, "http://localhost:8081/rss");
+
+
   // Create subscriber
   const subContr = await createSubscriber(regContr, sub);
-
+/*
   // Listen for publisher events
   pubContr.on("NewPubItem", (itemNum) => {
     console.log(`New item ${itemNum} has been published.`);
@@ -50,6 +52,8 @@ async function main() {
 
   // Get reactions
   getReactions(subContr);
+
+ */
 }
 
 async function createRegistry(main) {
