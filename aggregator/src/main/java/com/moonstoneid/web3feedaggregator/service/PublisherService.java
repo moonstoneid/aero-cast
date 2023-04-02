@@ -47,7 +47,8 @@ public class PublisherService {
         publisher.setFeedUrl(ethService.getPublisherFeedUrl(address));
         publisherRepo.save(publisher);
 
-        // TODO: Fetch publisher items
+        // Fetch entries for new publisher
+        entryservice.fetchEntries();
 
         ethEventListener.registerPublisherEventListener(publisher);
 

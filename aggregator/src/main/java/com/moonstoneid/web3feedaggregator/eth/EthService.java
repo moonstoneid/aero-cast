@@ -67,8 +67,25 @@ public class EthService {
     }
 
     public List<FeedPublisher.PubItem> getPublisherItems(String contractAddress) {
-        // TODO!!!
-        return null;
+        List<FeedPublisher.PubItem> items = new ArrayList<>();
+
+        // Use FeedPublisher contract to get PubItems
+        FeedPublisher contract = FeedPublisher.load(contractAddress, web3j, getCredentials(),
+                contractGasProvider);
+        try {
+            BigInteger count = contract.getTotalPubItemCount().sendAsync().get();
+            if(count == null) {
+                return items;
+            }
+            for (int i = 0; i < count.intValue(); i++) {
+                FeedPublisher.PubItem pubItem = contract.getPubItem(BigInteger.valueOf(i)).sendAsync().get();
+                items.add(pubItem);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return items;
     }
 
     private Credentials getCredentials() {
