@@ -1,19 +1,18 @@
 package com.moonstoneid.web3feedaggregator.eth;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.moonstoneid.web3feedaggregator.AppProperties;
 import com.moonstoneid.web3feedaggregator.eth.contracts.FeedPublisher;
 import com.moonstoneid.web3feedaggregator.eth.contracts.FeedRegistry;
 import com.moonstoneid.web3feedaggregator.eth.contracts.FeedSubscriber;
-import com.moonstoneid.web3feedaggregator.model.Subscriber;
 import com.moonstoneid.web3feedaggregator.repo.SubscriberRepo;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.tx.gas.ContractGasProvider;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class EthService {
@@ -88,6 +87,17 @@ public class EthService {
         return items;
     }
 
+    public FeedPublisher.PubItem getPubItem(String contractAddress, BigInteger index) {
+        // Use FeedPublisher contract to get PubItems
+        FeedPublisher contract = FeedPublisher.load(contractAddress, web3j, getCredentials(),
+                contractGasProvider);
+        try {
+           return contract.getPubItem(index).sendAsync().get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private Credentials getCredentials() {
         return Credentials.create(appProperties.getEth().getPrivateKey());
     }
@@ -113,6 +123,5 @@ public class EthService {
             return GAS_LIMIT;
         }
     };
-
 
 }

@@ -34,7 +34,7 @@ public class EntryService {
         Entry savedEntry = entryRepo.save(entry);
 
         // Publish to web3
-        publisher.publish(url + "/" + savedEntry.getId());
+        publisher.publish(url + "/feed/entry/" + savedEntry.getId());
     }
 
 }

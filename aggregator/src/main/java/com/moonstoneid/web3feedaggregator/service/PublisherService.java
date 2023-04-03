@@ -17,13 +17,14 @@ public class PublisherService {
 
     private final EthService ethService;
     private final EthPublisherEventListener ethEventListener;
-    private EntryService entryservice;
+    private final EntryService entryservice;
 
     public PublisherService(PublisherRepo publisherRepo, EthService ethService, EntryService entryservice) {
         this.entryservice = entryservice;
         this.ethService = ethService;
         this.publisherRepo = publisherRepo;
-        this.ethEventListener = new EthPublisherEventListener(this, ethService.getWeb3j());
+        this.ethEventListener = new EthPublisherEventListener(this, entryservice, ethService,
+                ethService.getWeb3j());
     }
 
     // Register listeners after Spring Boot has started

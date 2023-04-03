@@ -22,11 +22,11 @@ public interface EntryRepo extends JpaRepository<Entry, Entry.EntryId> {
            "WHERE s.subContractAddress = :address)")
     List<Entry> findAllBySubscriberContractAddress(@Param("address") String address);
 
-    @Query("SELECT e " +
+    @Query("SELECT case when count(e)> 0 then true else false end " +
             "FROM Entry e " +
             "WHERE e.pubContractAddress = :address " +
             "AND e.url = :url")
-    List<Entry> findAllByPubContractAddressAndEntryURL(@Param("address") String address, @Param("url") String url);
+    boolean existsByPubAddrAndEntryURL(@Param("address") String address, @Param("url") String url);
 
     @Query("SELECT MAX(e.number) " +
             "FROM Entry e " +
