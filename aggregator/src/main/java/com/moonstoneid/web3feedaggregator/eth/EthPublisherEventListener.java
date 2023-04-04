@@ -4,6 +4,9 @@ import com.moonstoneid.web3feedaggregator.eth.contracts.FeedPublisher;
 import com.moonstoneid.web3feedaggregator.model.Publisher;
 import com.moonstoneid.web3feedaggregator.service.EntryService;
 import com.moonstoneid.web3feedaggregator.service.PublisherService;
+import io.reactivex.disposables.Disposable;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
@@ -21,6 +24,8 @@ public class EthPublisherEventListener {
     private final EthService ethService;
     private final Web3j web3j;
 
+    private final MultiValueMap<String, Disposable> listeners = new LinkedMultiValueMap<>();
+
     public EthPublisherEventListener(PublisherService publisherService, EntryService entryService, EthService ethService,
             Web3j web3j) {
         this.web3j = web3j;
@@ -34,10 +39,11 @@ public class EthPublisherEventListener {
     }
 
     public void registerPublisherEventListener(Publisher publisher) {
-        String contractAddress = publisher.getContractAddress();
+        String contractAddr = publisher.getContractAddress();
 
-        EthFilter subFilter = createFilter(contractAddress, FeedPublisher.NEWPUBITEM_EVENT);
-        web3j.ethLogFlowable(subFilter).subscribe(l -> onNewPubItemEvent(contractAddress, l));
+        EthFilter subFilter = createFilter(contractAddr, FeedPublisher.NEWPUBITEM_EVENT);
+        Disposable sub = web3j.ethLogFlowable(subFilter).subscribe(l -> onNewPubItemEvent(contractAddr, l));
+        listeners.add(contractAddr, sub);
     }
 
     private void onNewPubItemEvent(String pubAddress, Log log) {
@@ -53,8 +59,10 @@ public class EthPublisherEventListener {
         entryService.createEntry(guid, pubAddress);
     }
 
-    public void unregisterPublisherEventListener(Publisher publisher) {
-        // TODO!!!
+    public void unregisterPublisherEventListener(String publisherAddr) {
+        for (Disposable d : listeners.get(publisherAddr)) {
+            d.dispose();
+        }
     }
 
     // TODO: Impl. smarter algorithm that only a processes only events after a specific block timestamp

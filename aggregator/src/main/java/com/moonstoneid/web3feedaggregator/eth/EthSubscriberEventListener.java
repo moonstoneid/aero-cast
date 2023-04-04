@@ -5,7 +5,10 @@ import java.util.Optional;
 import com.moonstoneid.web3feedaggregator.eth.contracts.FeedSubscriber;
 import com.moonstoneid.web3feedaggregator.model.Subscriber;
 import com.moonstoneid.web3feedaggregator.service.SubscriberService;
+import io.reactivex.disposables.Disposable;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.datatypes.Event;
 import org.web3j.protocol.Web3j;
@@ -13,10 +16,13 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.Log;
 
+
 public class EthSubscriberEventListener {
 
     private final SubscriberService subscriberService;
     private final Web3j web3j;
+    
+    private final MultiValueMap<String,Disposable> listeners = new LinkedMultiValueMap<>();
 
     public EthSubscriberEventListener(SubscriberService subscriberService, Web3j web3j) {
         this.web3j = web3j;
@@ -28,14 +34,18 @@ public class EthSubscriberEventListener {
     }
 
     public void registerSubscriberEventListener(Subscriber subscriber) {
-        String accountAddress = subscriber.getAccountAddress();
-        String contractAddress = subscriber.getContractAddress();
+        String accountAddr = subscriber.getAccountAddress();
+        String contractAddr = subscriber.getContractAddress();
 
-        EthFilter subFilter = createFilter(contractAddress, FeedSubscriber.CREATESUBSCRIPTION_EVENT);
-        web3j.ethLogFlowable(subFilter).subscribe(l -> onCreateSubscriptionEvent(accountAddress, l));
+        EthFilter subFilter = createFilter(contractAddr, FeedSubscriber.CREATESUBSCRIPTION_EVENT);
+        Disposable sub = web3j.ethLogFlowable(subFilter).subscribe(l -> onCreateSubscriptionEvent(accountAddr, l));
 
-        EthFilter unsubFilter = createFilter(contractAddress, FeedSubscriber.REMOVESUBSCRIPTION_EVENT);
-        web3j.ethLogFlowable(unsubFilter).subscribe(l -> onRemoveSubscriptionEvent(accountAddress, l));
+        EthFilter unsubFilter = createFilter(contractAddr, FeedSubscriber.REMOVESUBSCRIPTION_EVENT);
+        Disposable unsub = web3j.ethLogFlowable(unsubFilter).subscribe(l -> onRemoveSubscriptionEvent(accountAddr, l));
+
+        // Store listeners so we can unregister them later
+        listeners.add(contractAddr, sub);
+        listeners.add(contractAddr, unsub);
     }
 
     private void onCreateSubscriptionEvent(String subAddress, Log log) {
@@ -70,7 +80,9 @@ public class EthSubscriberEventListener {
     }
 
     public void unregisterSubscriberEventListener(Subscriber subscriber) {
-        // TODO!!!
+        for (Disposable listener : listeners.get(subscriber.getContractAddress())) {
+            listener.dispose();
+        }
     }
 
     // TODO: Impl. smarter algorithm that only a processes only events after a specific block timestamp

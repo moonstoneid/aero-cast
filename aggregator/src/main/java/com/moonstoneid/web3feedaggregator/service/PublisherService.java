@@ -57,8 +57,7 @@ public class PublisherService {
     }
 
     public void removePublisher(String address) {
-        // TODO: Cleanup publisher items
-        // Cleanup publisher entry items
+        ethEventListener.unregisterPublisherEventListener(address);
         entryservice.removeEntriesByPublisher(address);
         publisherRepo.deleteById(address);
     }
