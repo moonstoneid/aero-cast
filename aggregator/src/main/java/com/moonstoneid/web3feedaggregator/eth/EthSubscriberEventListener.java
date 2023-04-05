@@ -6,10 +6,12 @@ import com.moonstoneid.web3feedaggregator.eth.contracts.FeedSubscriber;
 import com.moonstoneid.web3feedaggregator.model.Subscriber;
 import com.moonstoneid.web3feedaggregator.service.SubscriberService;
 import io.reactivex.disposables.Disposable;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.web3j.abi.EventEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Event;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
@@ -49,34 +51,26 @@ public class EthSubscriberEventListener {
     }
 
     private void onCreateSubscriptionEvent(String subAddress, Log log) {
-        String pubAddress = getPublisherAddressFromLog(log);
-        if (pubAddress == null) {
-            return;
+        Optional<String> pubAddr = getPublisherAddressFromLog(log);
+        if (pubAddr.isPresent()) {
+            subscriberService.addSubscription(subAddress, pubAddr.get());
         }
-
-        subscriberService.addSubscription(subAddress, pubAddress);
     }
 
     private void onRemoveSubscriptionEvent(String subAddress, Log log) {
-        String pubAddress = getPublisherAddressFromLog(log);
-        if (pubAddress == null) {
-            return;
+        Optional<String> pubAddr = getPublisherAddressFromLog(log);
+        if (pubAddr.isPresent()) {
+            subscriberService.removeSubscription(subAddress, pubAddr.get());
         }
-
-        subscriberService.removeSubscription(subAddress, pubAddress);
     }
 
-    @Nullable
-    private static String getPublisherAddressFromLog(Log log) {
-        Optional<String> item = log.getTopics()
-                .stream()
-                .filter(str -> str.startsWith("0x000000000000000000000000"))
-                .findFirst();
-        if (item.isEmpty()) {
-            return null;
+    private static Optional<String> getPublisherAddressFromLog(Log log) {
+        if(log.getTopics().size() <= 1) {
+            return Optional.empty();
         }
-        // Remove padding and add '0x' address prefix
-        return "0x" + item.get().substring(26);
+        String topic = log.getTopics().get(1);
+        Address address = (Address) FunctionReturnDecoder.decodeIndexedValue(topic,new TypeReference<Address>() {});
+        return Optional.ofNullable(address.getValue());
     }
 
     public void unregisterSubscriberEventListener(Subscriber subscriber) {

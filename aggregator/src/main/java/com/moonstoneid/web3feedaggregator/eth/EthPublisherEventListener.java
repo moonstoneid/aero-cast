@@ -17,6 +17,9 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.Log;
 
+import java.math.BigInteger;
+import java.util.Optional;
+
 public class EthPublisherEventListener {
 
     private final PublisherService publisherService;
@@ -47,16 +50,15 @@ public class EthPublisherEventListener {
     }
 
     private void onNewPubItemEvent(String pubAddress, Log log) {
-        // Topic 0: Event signature, topic 1: Item
-        // See  https://medium.com/mycrypto/understanding-event-logs-on-the-ethereum-blockchain-f4ae7ba50378
-        Uint putItemNumber =  (Uint) FunctionReturnDecoder.decodeIndexedValue(log.getTopics().get(1),
-                new TypeReference<Uint>(){});
-
-        // Get pubItem from contract
-        FeedPublisher.PubItem pubItem = ethService.getPubItem(pubAddress, putItemNumber.getValue());
-        String guid = pubItem.data;
-
-        entryService.createEntry(guid, pubAddress);
+        Optional<BigInteger> id = getPubItemIdFromLog(log);
+        if (id.isPresent()) {
+            // Get pubItem from contract
+            FeedPublisher.PubItem pubItem = ethService.getPubItem(pubAddress, id.get());
+            if(pubItem != null && pubItem.data != null) {
+                String guid = pubItem.data;
+                entryService.createEntry(guid, pubAddress);
+            }
+        }
     }
 
     public void unregisterPublisherEventListener(String publisherAddr) {
@@ -71,6 +73,17 @@ public class EthPublisherEventListener {
                 DefaultBlockParameterName.LATEST, contractAddress);
         filter.addSingleTopic(EventEncoder.encode(event));
         return filter;
+    }
+
+    private static Optional<BigInteger> getPubItemIdFromLog(Log log) {
+        if(log.getTopics().size() <= 1) {
+            return Optional.empty();
+        }
+        String topic = log.getTopics().get(1);
+        // Topic 0: Event signature, topic 1: Item
+        // See  https://medium.com/mycrypto/understanding-event-logs-on-the-ethereum-blockchain-f4ae7ba50378
+        Uint putItemNumber =  (Uint) FunctionReturnDecoder.decodeIndexedValue(topic, new TypeReference<Uint>(){});
+        return Optional.ofNullable(putItemNumber.getValue());
     }
 
 }
