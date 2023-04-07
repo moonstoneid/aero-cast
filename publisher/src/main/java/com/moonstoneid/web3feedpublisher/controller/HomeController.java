@@ -1,11 +1,11 @@
-package com.moonstoneid.web3publisher.controller;
+package com.moonstoneid.web3feedpublisher.controller;
 
 import java.util.List;
 
-import com.moonstoneid.web3publisher.AppProperties;
-import com.moonstoneid.web3publisher.controller.model.EntryVM;
-import com.moonstoneid.web3publisher.model.Entry;
-import com.moonstoneid.web3publisher.service.EntryService;
+import com.moonstoneid.web3feedpublisher.AppProperties;
+import com.moonstoneid.web3feedpublisher.controller.model.EntryVM;
+import com.moonstoneid.web3feedpublisher.model.Entry;
+import com.moonstoneid.web3feedpublisher.service.EntryService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

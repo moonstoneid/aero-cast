@@ -1,10 +1,10 @@
-package com.moonstoneid.web3publisher.service;
+package com.moonstoneid.web3feedpublisher.service;
 
 import java.util.List;
 
-import com.moonstoneid.web3publisher.eth.Publisher;
-import com.moonstoneid.web3publisher.repo.EntryRepo;
-import com.moonstoneid.web3publisher.model.Entry;
+import com.moonstoneid.web3feedpublisher.eth.Publisher;
+import com.moonstoneid.web3feedpublisher.repo.EntryRepo;
+import com.moonstoneid.web3feedpublisher.model.Entry;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 

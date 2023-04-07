@@ -1,9 +1,9 @@
-package com.moonstoneid.web3publisher.eth;
+package com.moonstoneid.web3feedpublisher.eth;
 
 import java.math.BigInteger;
 
-import com.moonstoneid.web3publisher.AppProperties;
-import com.moonstoneid.web3publisher.eth.contracts.FeedPublisher;
+import com.moonstoneid.web3feedpublisher.AppProperties;
+import com.moonstoneid.web3feedpublisher.eth.contracts.FeedPublisher;
 import org.springframework.stereotype.Component;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;

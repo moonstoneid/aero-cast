@@ -1,11 +1,11 @@
-package com.moonstoneid.web3publisher.controller;
+package com.moonstoneid.web3feedpublisher.controller;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.moonstoneid.web3publisher.model.Entry;
-import com.moonstoneid.web3publisher.service.EntryService;
+import com.moonstoneid.web3feedpublisher.model.Entry;
+import com.moonstoneid.web3feedpublisher.service.EntryService;
 import com.rometools.rome.feed.synd.SyndContentImpl;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndEntryImpl;

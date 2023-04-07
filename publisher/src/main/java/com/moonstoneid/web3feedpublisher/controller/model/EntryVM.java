@@ -1,4 +1,4 @@
-package com.moonstoneid.web3publisher.controller.model;
+package com.moonstoneid.web3feedpublisher.controller.model;
 
 import java.time.OffsetDateTime;
 

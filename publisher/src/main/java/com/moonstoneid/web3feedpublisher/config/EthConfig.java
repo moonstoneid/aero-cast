@@ -1,6 +1,6 @@
-package com.moonstoneid.web3publisher.config;
+package com.moonstoneid.web3feedpublisher.config;
 
-import com.moonstoneid.web3publisher.AppProperties;
+import com.moonstoneid.web3feedpublisher.AppProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.web3j.protocol.Web3j;

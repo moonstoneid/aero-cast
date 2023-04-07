@@ -1,10 +1,10 @@
-package com.moonstoneid.web3publisher.controller;
+package com.moonstoneid.web3feedpublisher.controller;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.moonstoneid.web3publisher.controller.model.EntryVM;
-import com.moonstoneid.web3publisher.model.Entry;
+import com.moonstoneid.web3feedpublisher.controller.model.EntryVM;
+import com.moonstoneid.web3feedpublisher.model.Entry;
 
 public final class ModelMapper {
 

@@ -1,4 +1,4 @@
-package com.moonstoneid.web3publisher.controller;
+package com.moonstoneid.web3feedpublisher.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;

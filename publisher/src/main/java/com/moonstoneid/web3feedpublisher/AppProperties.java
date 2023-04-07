@@ -1,4 +1,4 @@
-package com.moonstoneid.web3publisher;
+package com.moonstoneid.web3feedpublisher;
 
 import lombok.Getter;
 import lombok.Setter;

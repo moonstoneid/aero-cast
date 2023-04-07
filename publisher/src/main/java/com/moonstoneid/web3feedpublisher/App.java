@@ -1,4 +1,4 @@
-package com.moonstoneid.web3publisher;
+package com.moonstoneid.web3feedpublisher;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
