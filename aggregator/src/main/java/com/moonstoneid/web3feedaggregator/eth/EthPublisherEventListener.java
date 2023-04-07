@@ -41,7 +41,8 @@ public class EthPublisherEventListener {
     }
 
     public void registerPublisherEventListener(String contractAddr) {
-        log.debug("Adding event listener on publisher contract '{}'.", contractAddr);
+        log.debug("Adding event listener on publisher contract '{}'.",
+                EthUtil.shortenAddress(contractAddr));
 
         String blockNumber = ethService.getCurrentBlockNumber();
 
@@ -68,7 +69,8 @@ public class EthPublisherEventListener {
     }
 
     public void unregisterPublisherEventListener(String contractAddr) {
-        log.debug("Removing event listener on publisher contract '{}'.", contractAddr);
+        log.debug("Removing event listener on publisher contract '{}'.",
+                EthUtil.shortenAddress(contractAddr));
 
         for (Disposable d : listeners.get(contractAddr)) {
             d.dispose();

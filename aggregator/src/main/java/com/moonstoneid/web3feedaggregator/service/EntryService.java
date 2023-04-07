@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.moonstoneid.web3feedaggregator.eth.EthService;
+import com.moonstoneid.web3feedaggregator.eth.EthUtil;
 import com.moonstoneid.web3feedaggregator.eth.contracts.FeedPublisher;
 import com.moonstoneid.web3feedaggregator.model.Entry;
 import com.moonstoneid.web3feedaggregator.model.Publisher;
@@ -44,7 +45,7 @@ public class EntryService {
     }
 
     public void fetchEntries(String pubAddress) {
-        log.info("Fetching entries for publisher '{}' ...", pubAddress);
+        log.info("Fetching entries for publisher '{}' ...", EthUtil.shortenAddress(pubAddress));
 
         List<FeedPublisher.PubItem> pubItems = ethService.getPublisherItems(pubAddress);
         pubItems.forEach(pubItem -> {
@@ -68,7 +69,7 @@ public class EntryService {
             return;
         }
 
-        log.info("Fetching entry '{}/{}' ...", pubAddress, guid);
+        log.info("Fetching entry '{}/{}' ...", EthUtil.shortenAddress(pubAddress), guid);
 
         SyndEntry feedEntry = getEntry(feed, guid);
         if (!entryRepo.existsByPubAddrAndEntryURL(pubAddress, guid)) {
@@ -93,7 +94,7 @@ public class EntryService {
             feed = new SyndFeedInput().build(new XmlReader(new URL(publisher.getFeedUrl())));
         } catch (FeedException | IOException e) {
             log.info("Could not read RSS feed from URL '{}' for for publisher '{}' ...",
-                    publisher.getFeedUrl(), publisher.getContractAddress());
+                    publisher.getFeedUrl(), EthUtil.shortenAddress(publisher.getContractAddress()));
             throw new RuntimeException("Could not read RSS feed from URL: " + publisher.getFeedUrl());
         }
         return feed;

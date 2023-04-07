@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.moonstoneid.web3feedaggregator.eth.EthPublisherEventListener;
 import com.moonstoneid.web3feedaggregator.eth.EthService;
+import com.moonstoneid.web3feedaggregator.eth.EthUtil;
 import com.moonstoneid.web3feedaggregator.model.Publisher;
 import com.moonstoneid.web3feedaggregator.repo.PublisherRepo;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +56,7 @@ public class PublisherService {
         publisher.setBlockNumber(ethService.getCurrentBlockNumber());
         publisherRepo.save(publisher);
 
-        log.info("Publisher '{}' was created.", address);
+        log.info("Publisher '{}' was created.", EthUtil.shortenAddress(address));
 
         // Fetch entries for new publisher
         entryservice.fetchEntries(address);
@@ -66,18 +67,18 @@ public class PublisherService {
     }
 
     public void removePublisher(String address) {
-        log.info("Trying to remove publisher '{}' ...", address);
+        log.info("Trying to remove publisher '{}' ...", EthUtil.shortenAddress(address));
 
         Publisher publisher = publisherRepo.getById(address);
         if (publisher == null) {
-            log.info("Publisher '{}' was not found.", address);
+            log.info("Publisher '{}' was not found.", EthUtil.shortenAddress(address));
             return;
         }
         ethEventListener.unregisterPublisherEventListener(address);
         entryservice.removeEntriesByPublisher(address);
         publisherRepo.deleteById(address);
 
-        log.info("Publisher '{}' has been removed.", address);
+        log.info("Publisher '{}' has been removed.", EthUtil.shortenAddress(address));
     }
 
 }

@@ -16,4 +16,8 @@ public class EthUtil {
         return filter;
     }
 
+    // Create a method to shorten ethereum addresses to the first 6 and last 2 characters
+    public static String shortenAddress(String address) {
+        return address.substring(0, 6) + "..." + address.substring(address.length() - 2);
+    }
 }

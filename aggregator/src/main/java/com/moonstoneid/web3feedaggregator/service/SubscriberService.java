@@ -7,6 +7,7 @@ import java.util.Optional;
 import com.moonstoneid.web3feedaggregator.error.NotFoundException;
 import com.moonstoneid.web3feedaggregator.eth.EthSubscriberEventListener;
 import com.moonstoneid.web3feedaggregator.eth.EthService;
+import com.moonstoneid.web3feedaggregator.eth.EthUtil;
 import com.moonstoneid.web3feedaggregator.eth.contracts.FeedSubscriber;
 import com.moonstoneid.web3feedaggregator.model.Entry;
 import com.moonstoneid.web3feedaggregator.model.Publisher;
@@ -60,16 +61,16 @@ public class SubscriberService {
     }
 
     public void createSubscriber(String address) {
-        log.info("Trying to register subscriber '{}' ...", address);
+        log.info("Trying to register subscriber '{}' ...", EthUtil.shortenAddress(address));
 
         if (subscriberRepo.existsById(address)) {
-            log.info("Subscriber '{}' is already registered.", address);
+            log.info("Subscriber '{}' is already registered.", EthUtil.shortenAddress(address));
             return;
         }
 
         String contractAddress = ethService.getSubscriberContractAddress(address);
         if (contractAddress == null) {
-            log.error("A contract for subscriber '{}' was not found!", address);
+            log.error("A contract for subscriber '{}' was not found!", EthUtil.shortenAddress(address));
             throw new NotFoundException("Subscriber was not found!");
         }
 
@@ -93,17 +94,18 @@ public class SubscriberService {
 
         subscriberRepo.save(subscriber);
 
-        log.info("Subscriber '{}' with contract '{}' has been registered.", address, contractAddress);
+        log.info("Subscriber '{}' with contract '{}' has been registered.",
+                EthUtil.shortenAddress(address), EthUtil.shortenAddress(contractAddress));
 
         ethEventListener.registerSubscriberEventListener(subscriber);
     }
 
     public void removeSubscriber(String address) {
-        log.info("Trying to unregister subscriber '{}' ...", address);
+        log.info("Trying to unregister subscriber '{}' ...", EthUtil.shortenAddress(address));
 
         Subscriber subscriber = subscriberRepo.getById(address);
         if (subscriber == null) {
-            log.info("Subscriber '{}' was not found.", address);
+            log.info("Subscriber '{}' was not found.", EthUtil.shortenAddress(address));
             return;
         }
 
@@ -111,7 +113,7 @@ public class SubscriberService {
 
         subscriberRepo.deleteById(address);
 
-        log.info("Subscriber '{}' has been unregistered.", address);
+        log.info("Subscriber '{}' has been unregistered.", EthUtil.shortenAddress(address));
     }
 
     public void addSubscription(String address, String pubAddress) {
@@ -122,7 +124,8 @@ public class SubscriberService {
         }
 
         log.info("Adding subscription '{}/{}' of subscriber '{}' ...",
-                subscriber.getContractAddress(), pubAddress, address);
+                EthUtil.shortenAddress(subscriber.getContractAddress()),
+                EthUtil.shortenAddress(pubAddress), EthUtil.shortenAddress(address));
 
         // Create publisher if publisher does not exists
         publisherService.createPublisher(pubAddress);
@@ -154,7 +157,8 @@ public class SubscriberService {
         }
 
         log.info("Removing subscription '{}/{}' of subscriber '{}' ...",
-                subscriber.getContractAddress(), pubAddress, address);
+                EthUtil.shortenAddress(subscriber.getContractAddress()),
+                EthUtil.shortenAddress(pubAddress), EthUtil.shortenAddress(address));
 
         subscriber.getSubscriptions().removeIf(s -> s.getPubContractAddress().equalsIgnoreCase(pubAddress));
         if (subscriber.getSubscriptions().isEmpty()) {

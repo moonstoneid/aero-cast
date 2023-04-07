@@ -40,7 +40,8 @@ public class EthSubscriberEventListener {
         String contractAddr = subscriber.getContractAddress();
         String blockNumber = ethService.getCurrentBlockNumber();
 
-        log.debug("Adding event listener on subscriber contract '{}'.", contractAddr);
+        log.debug("Adding event listener on subscriber contract '{}'.",
+                EthUtil.shortenAddress(contractAddr));
 
         EthFilter subFilter = EthUtil.createFilter(contractAddr, blockNumber, FeedSubscriber.CREATESUBSCRIPTION_EVENT);
         Disposable sub = web3j.ethLogFlowable(subFilter).subscribe(l -> onCreateSubscriptionEvent(accountAddr, l));
@@ -78,7 +79,7 @@ public class EthSubscriberEventListener {
 
     public void unregisterSubscriberEventListener(Subscriber subscriber) {
         log.debug("Removing event listener on subscriber contract '{}'.",
-                subscriber.getContractAddress());
+                EthUtil.shortenAddress(subscriber.getContractAddress()));
 
         for (Disposable listener : listeners.get(subscriber.getContractAddress())) {
             listener.dispose();
