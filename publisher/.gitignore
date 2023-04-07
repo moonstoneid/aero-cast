@@ -14,4 +14,4 @@
 /target
 
 # H2 Database file
-/database.mv.db
+/pubdb.mv.db

@@ -1,7 +1,6 @@
 # IntelliJ project files
 /.idea
 *.iml
-!/.idea/runConfigurations/App.xml
 
 # Eclipse project files
 /.settings
@@ -15,4 +14,4 @@
 /target
 
 # H2 Database file
-/database.mv.db
+/aggdb.mv.db
