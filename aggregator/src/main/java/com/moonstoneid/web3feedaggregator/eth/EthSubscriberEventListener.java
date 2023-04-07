@@ -18,7 +18,6 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.Log;
 
-
 public class EthSubscriberEventListener {
 
     private final SubscriberService subscriberService;
@@ -27,8 +26,8 @@ public class EthSubscriberEventListener {
     private final MultiValueMap<String,Disposable> listeners = new LinkedMultiValueMap<>();
 
     public EthSubscriberEventListener(SubscriberService subscriberService, Web3j web3j) {
-        this.web3j = web3j;
         this.subscriberService = subscriberService;
+        this.web3j = web3j;
     }
 
     public void registerSubscriberEventListeners() {
@@ -40,10 +39,12 @@ public class EthSubscriberEventListener {
         String contractAddr = subscriber.getContractAddress();
 
         EthFilter subFilter = createFilter(contractAddr, FeedSubscriber.CREATESUBSCRIPTION_EVENT);
-        Disposable sub = web3j.ethLogFlowable(subFilter).subscribe(l -> onCreateSubscriptionEvent(accountAddr, l));
+        Disposable sub = web3j.ethLogFlowable(subFilter).subscribe(
+                l -> onCreateSubscriptionEvent(accountAddr, l));
 
         EthFilter unsubFilter = createFilter(contractAddr, FeedSubscriber.REMOVESUBSCRIPTION_EVENT);
-        Disposable unsub = web3j.ethLogFlowable(unsubFilter).subscribe(l -> onRemoveSubscriptionEvent(accountAddr, l));
+        Disposable unsub = web3j.ethLogFlowable(unsubFilter).subscribe(
+                l -> onRemoveSubscriptionEvent(accountAddr, l));
 
         // Store listeners so we can unregister them later
         listeners.add(contractAddr, sub);
@@ -69,7 +70,8 @@ public class EthSubscriberEventListener {
             return Optional.empty();
         }
         String topic = log.getTopics().get(1);
-        Address address = (Address) FunctionReturnDecoder.decodeIndexedValue(topic,new TypeReference<Address>() {});
+        Address address = (Address) FunctionReturnDecoder.decodeIndexedValue(topic,
+                new TypeReference<Address>() {});
         return Optional.ofNullable(address.getValue());
     }
 

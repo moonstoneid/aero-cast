@@ -18,24 +18,24 @@ import com.moonstoneid.web3feedaggregator.repo.SubscriptionRepo;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SubscriberService {
 
     private final SubscriberRepo subscriberRepo;
-    private final EntryRepo entryRepo;
-    private final PublisherService publisherService;
     private final SubscriptionRepo subscriptionRepo;
+    private final PublisherService publisherService;
+    private final EntryRepo entryRepo;
+
     private final EthService ethService;
     private final EthSubscriberEventListener ethEventListener;
 
-    public SubscriberService(SubscriberRepo subscriberRepo, EntryRepo entryRepo,
-            PublisherService publisherService, EthService ethService, SubscriptionRepo subscriptionRepo) {
+    public SubscriberService(SubscriberRepo subscriberRepo, SubscriptionRepo subscriptionRepo,
+            PublisherService publisherService, EntryRepo entryRepo, EthService ethService) {
         this.subscriberRepo = subscriberRepo;
-        this.entryRepo = entryRepo;
-        this.publisherService = publisherService;
         this.subscriptionRepo = subscriptionRepo;
+        this.publisherService = publisherService;
+        this.entryRepo = entryRepo;
 
         this.ethService = ethService;
         this.ethEventListener = new EthSubscriberEventListener(this, ethService.getWeb3j());
@@ -85,6 +85,7 @@ public class SubscriberService {
         subscriber.setSubscriptions(subscriptions);
 
         subscriberRepo.save(subscriber);
+
         ethEventListener.registerSubscriberEventListener(subscriber);
     }
 
@@ -125,7 +126,6 @@ public class SubscriberService {
         subscriberRepo.save(subscriber);
     }
 
-
     public void removeSubscription(String address, String pubAddress) {
         // Get subscriber
         Subscriber subscriber = subscriberRepo.getById(address);
@@ -134,7 +134,7 @@ public class SubscriberService {
         }
 
         subscriber.getSubscriptions().removeIf(s -> s.getPubContractAddress().equalsIgnoreCase(pubAddress));
-        if(subscriber.getSubscriptions().isEmpty()){
+        if (subscriber.getSubscriptions().isEmpty()) {
             subscriber.setSubscriptions(null);
             subscriptionRepo.deleteById(subscriber.getContractAddress(), pubAddress);
         }

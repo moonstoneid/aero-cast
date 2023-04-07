@@ -15,14 +15,16 @@ public class PublisherService {
 
     private final PublisherRepo publisherRepo;
 
-    private final EthService ethService;
-    private final EthPublisherEventListener ethEventListener;
     private final EntryService entryservice;
 
-    public PublisherService(PublisherRepo publisherRepo, EthService ethService, EntryService entryservice) {
+    private final EthService ethService;
+    private final EthPublisherEventListener ethEventListener;
+
+    public PublisherService(PublisherRepo publisherRepo, EntryService entryservice,
+            EthService ethService) {
+        this.publisherRepo = publisherRepo;
         this.entryservice = entryservice;
         this.ethService = ethService;
-        this.publisherRepo = publisherRepo;
         this.ethEventListener = new EthPublisherEventListener(this, entryservice, ethService,
                 ethService.getWeb3j());
     }
@@ -63,4 +65,3 @@ public class PublisherService {
     }
 
 }
-

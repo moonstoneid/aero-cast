@@ -1,32 +1,30 @@
 package com.moonstoneid.web3feedaggregator.eth;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.moonstoneid.web3feedaggregator.AppProperties;
 import com.moonstoneid.web3feedaggregator.eth.contracts.FeedPublisher;
 import com.moonstoneid.web3feedaggregator.eth.contracts.FeedRegistry;
 import com.moonstoneid.web3feedaggregator.eth.contracts.FeedSubscriber;
-import com.moonstoneid.web3feedaggregator.repo.SubscriberRepo;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.tx.gas.ContractGasProvider;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class EthService {
 
     private static final BigInteger GAS_LIMIT = BigInteger.valueOf(6721975L);
     private static final BigInteger GAS_PRICE = BigInteger.valueOf(20000000000L);
-    private final Web3j web3j;
-    private final SubscriberRepo subscriberRepo;
-    private final AppProperties appProperties;
 
-    public EthService(Web3j web3j, SubscriberRepo subscriberRepo, AppProperties appProperties) {
-        this.web3j = web3j;
-        this.subscriberRepo = subscriberRepo;
+    private final AppProperties appProperties;
+    private final Web3j web3j;
+
+    public EthService(AppProperties appProperties, Web3j web3j) {
         this.appProperties = appProperties;
+        this.web3j = web3j;
     }
 
     public Web3j getWeb3j() {
@@ -73,14 +71,14 @@ public class EthService {
                 contractGasProvider);
         try {
             BigInteger count = contract.getTotalPubItemCount().sendAsync().get();
-            if(count == null) {
+            if (count == null) {
                 return items;
             }
             for (int i = 0; i < count.intValue(); i++) {
-                FeedPublisher.PubItem pubItem = contract.getPubItem(BigInteger.valueOf(i)).sendAsync().get();
+                FeedPublisher.PubItem pubItem = contract.getPubItem(BigInteger.valueOf(i))
+                        .sendAsync().get();
                 items.add(pubItem);
             }
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -1,5 +1,11 @@
 package com.moonstoneid.web3feedaggregator.service;
 
+import java.io.IOException;
+import java.net.URL;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Optional;
+
 import com.moonstoneid.web3feedaggregator.eth.EthService;
 import com.moonstoneid.web3feedaggregator.eth.contracts.FeedPublisher;
 import com.moonstoneid.web3feedaggregator.model.Entry;
@@ -15,32 +21,24 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.net.URL;
-import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Optional;
-
 @Service
 public class EntryService {
 
     private final EntryRepo entryRepo;
-
     // TODO: Would be better to have a PublisherService but this leads to a cyclic dependency
     private final PublisherRepo publisherRepo;
+
     private final EthService ethService;
 
-    public EntryService(EntryRepo entryRepo, EthService ethService, PublisherRepo publisherRepo) {
+    public EntryService(EntryRepo entryRepo, PublisherRepo publisherRepo, EthService ethService) {
         this.entryRepo = entryRepo;
-        this.ethService = ethService;
         this.publisherRepo = publisherRepo;
+        this.ethService = ethService;
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void fetchEntries() {
-        publisherRepo.findAll().forEach(pub -> {
-            fetchEntries(pub.getContractAddress());
-        });
+        publisherRepo.findAll().forEach(pub -> fetchEntries(pub.getContractAddress()));
     }
 
     public void fetchEntries(String pubAddr) {

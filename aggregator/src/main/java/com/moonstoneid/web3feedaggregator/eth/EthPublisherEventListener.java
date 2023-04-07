@@ -1,5 +1,8 @@
 package com.moonstoneid.web3feedaggregator.eth;
 
+import java.math.BigInteger;
+import java.util.Optional;
+
 import com.moonstoneid.web3feedaggregator.eth.contracts.FeedPublisher;
 import com.moonstoneid.web3feedaggregator.model.Publisher;
 import com.moonstoneid.web3feedaggregator.service.EntryService;
@@ -17,9 +20,6 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.Log;
 
-import java.math.BigInteger;
-import java.util.Optional;
-
 public class EthPublisherEventListener {
 
     private final PublisherService publisherService;
@@ -29,12 +29,12 @@ public class EthPublisherEventListener {
 
     private final MultiValueMap<String, Disposable> listeners = new LinkedMultiValueMap<>();
 
-    public EthPublisherEventListener(PublisherService publisherService, EntryService entryService, EthService ethService,
-            Web3j web3j) {
-        this.web3j = web3j;
+    public EthPublisherEventListener(PublisherService publisherService, EntryService entryService,
+            EthService ethService, Web3j web3j) {
         this.publisherService = publisherService;
         this.entryService = entryService;
         this.ethService = ethService;
+        this.web3j = web3j;
     }
 
     public void registerPublisherEventListeners() {
@@ -54,7 +54,7 @@ public class EthPublisherEventListener {
         if (id.isPresent()) {
             // Get pubItem from contract
             FeedPublisher.PubItem pubItem = ethService.getPubItem(pubAddress, id.get());
-            if(pubItem != null && pubItem.data != null) {
+            if (pubItem != null && pubItem.data != null) {
                 String guid = pubItem.data;
                 entryService.createEntry(guid, pubAddress);
             }
@@ -76,7 +76,7 @@ public class EthPublisherEventListener {
     }
 
     private static Optional<BigInteger> getPubItemIdFromLog(Log log) {
-        if(log.getTopics().size() <= 1) {
+        if (log.getTopics().size() <= 1) {
             return Optional.empty();
         }
         String topic = log.getTopics().get(1);
