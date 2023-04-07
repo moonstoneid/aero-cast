@@ -151,7 +151,7 @@ public class SubscriberService {
         if (subscriber == null) {
             throw new NotFoundException("Subscriber was not found!");
         }
-        return entryRepo.findAllBySubscriberContractAddress(address);
+        return entryRepo.findAllBySubscriberContractAddress(subscriber.getContractAddress());
     }
 
     private boolean subscriptionsExist(String pubAddress) {

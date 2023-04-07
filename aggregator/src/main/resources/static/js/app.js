@@ -25,9 +25,9 @@ const appTmpl = `
       <th>Link</th>
     </tr>
     <tr v-for="entry in entries">
+      <td>{{ entry.date }}"</td>
       <td>{{ entry.title }}</td>
       <td>{{ entry.description }}</td>
-      <td>{{ entry.date }}"</td>
       <td><a v-bind:href="entry.url" />{{ entry.url }}</td>
     </tr>
   </table>
