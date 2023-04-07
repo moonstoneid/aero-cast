@@ -11,6 +11,7 @@ import com.moonstoneid.web3feedaggregator.eth.contracts.FeedSubscriber;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.tx.gas.ContractGasProvider;
 
 @Service
@@ -91,6 +92,14 @@ public class EthService {
                 contractGasProvider);
         try {
            return contract.getPubItem(index).sendAsync().get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String getCurrentBlockNumber() {
+        try {
+            return web3j.ethBlockNumber().sendAsync().get().getBlockNumber().toString();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

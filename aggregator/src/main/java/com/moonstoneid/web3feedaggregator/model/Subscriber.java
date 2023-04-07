@@ -1,6 +1,7 @@
 package com.moonstoneid.web3feedaggregator.model;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -24,6 +25,9 @@ public class Subscriber implements Serializable {
 
     @Column(name = "contract_address", length = 42, nullable = false)
     private String contractAddress;
+
+    @Column(name = "block_number", length = 42, nullable = false)
+    private String blockNumber;
 
     // TODO: This is a workaround to prevent LazyInitializationException, should be fixed for prod
     // Added updatable = false to prevent Hibernate from updating the foreign key with null

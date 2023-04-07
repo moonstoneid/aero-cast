@@ -37,13 +37,13 @@ public class SubscriberController {
     @PostMapping(value = "/{address}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void registerSubscriber(@PathVariable("address") String address) {
-        subscriberService.registerSubscriberByAccountAddress(address);
+        subscriberService.createSubscriber(address);
     }
 
     @DeleteMapping(value = "/{address}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void unregisterSubscriber(@PathVariable("address") String address) {
-        subscriberService.unregisterSubscriberByAccountAddress(address);
+        subscriberService.removeSubscriber(address);
     }
 
     @GetMapping(value = "/{address}/entries", produces = { "application/json" })

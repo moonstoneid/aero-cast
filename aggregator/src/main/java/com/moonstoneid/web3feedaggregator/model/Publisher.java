@@ -20,4 +20,6 @@ public class Publisher implements Serializable {
     @Column(name = "feed_url", length = 500, nullable = false)
     private String feedUrl;
 
+    @Column(name = "block_number", length = 42, nullable = false)
+    private String blockNumber;
 }

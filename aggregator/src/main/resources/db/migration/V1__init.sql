@@ -1,12 +1,14 @@
 CREATE TABLE publisher (
   contract_address VARCHAR(42) NOT NULL,
   feed_url VARCHAR(500) NOT NULL,
+  block_number VARCHAR(42) NOT NULL,
   PRIMARY KEY (contract_address)
 );
 
 CREATE TABLE subscriber (
   account_address VARCHAR(42) NOT NULL,
   contract_address VARCHAR(42) NOT NULL,
+  block_number VARCHAR(42) NOT NULL,
   PRIMARY KEY (account_address),
   UNIQUE (contract_address)
 );

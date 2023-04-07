@@ -38,7 +38,7 @@ public class SubscriberService {
         this.entryRepo = entryRepo;
 
         this.ethService = ethService;
-        this.ethEventListener = new EthSubscriberEventListener(this, ethService.getWeb3j());
+        this.ethEventListener = new EthSubscriberEventListener(this, ethService);
     }
 
     // Register listeners after Spring Boot has started
@@ -57,7 +57,7 @@ public class SubscriberService {
                 .orElseThrow(() -> new NotFoundException("Subscriber was not found!"));
     }
 
-    public void registerSubscriberByAccountAddress(String address) {
+    public void createSubscriber(String address) {
         if (subscriberRepo.existsById(address)) {
             return;
         }
@@ -83,20 +83,19 @@ public class SubscriberService {
         subscriber.setAccountAddress(address.toLowerCase());
         subscriber.setContractAddress(contractAddress);
         subscriber.setSubscriptions(subscriptions);
+        subscriber.setBlockNumber(ethService.getCurrentBlockNumber());
 
         subscriberRepo.save(subscriber);
 
         ethEventListener.registerSubscriberEventListener(subscriber);
     }
 
-    public void unregisterSubscriberByAccountAddress(String address) {
+    public void removeSubscriber(String address) {
         Subscriber subscriber = subscriberRepo.getById(address);
         if (subscriber == null) {
             return;
         }
-
         ethEventListener.unregisterSubscriberEventListener(subscriber);
-
         subscriberRepo.deleteById(address);
     }
 
@@ -107,7 +106,7 @@ public class SubscriberService {
             return;
         }
 
-        // Get publisher
+        // Create publisher if not exists publisher
         publisherService.createPublisher(pubAddress);
 
         // Abort if subscriber already has subscription
@@ -123,6 +122,9 @@ public class SubscriberService {
         subscriptions.setSubContractAddress(subscriber.getContractAddress());
         subscriptions.setPubContractAddress(pubAddress);
         subscriber.getSubscriptions().add(subscriptions);
+
+        // Update block number
+        subscriber.setBlockNumber(ethService.getCurrentBlockNumber());
         subscriberRepo.save(subscriber);
     }
 

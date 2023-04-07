@@ -43,8 +43,9 @@ public class EthPublisherEventListener {
 
     public void registerPublisherEventListener(Publisher publisher) {
         String contractAddr = publisher.getContractAddress();
+        String blockNumber = ethService.getCurrentBlockNumber();
 
-        EthFilter subFilter = createFilter(contractAddr, FeedPublisher.NEWPUBITEM_EVENT);
+        EthFilter subFilter = EthUtil.createFilter(contractAddr, blockNumber, FeedPublisher.NEWPUBITEM_EVENT);
         Disposable sub = web3j.ethLogFlowable(subFilter).subscribe(l -> onNewPubItemEvent(contractAddr, l));
         listeners.add(contractAddr, sub);
     }
@@ -65,14 +66,6 @@ public class EthPublisherEventListener {
         for (Disposable d : listeners.get(publisherAddr)) {
             d.dispose();
         }
-    }
-
-    // TODO: Impl. smarter algorithm that only a processes only events after a specific block timestamp
-    private static EthFilter createFilter(String contractAddress, Event event) {
-        EthFilter filter = new EthFilter(DefaultBlockParameterName.EARLIEST,
-                DefaultBlockParameterName.LATEST, contractAddress);
-        filter.addSingleTopic(EventEncoder.encode(event));
-        return filter;
     }
 
     private static Optional<BigInteger> getPubItemIdFromLog(Log log) {

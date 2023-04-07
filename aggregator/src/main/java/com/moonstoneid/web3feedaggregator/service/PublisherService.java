@@ -48,6 +48,7 @@ public class PublisherService {
         publisher = new Publisher();
         publisher.setContractAddress(address.toLowerCase());
         publisher.setFeedUrl(ethService.getPublisherFeedUrl(address));
+        publisher.setBlockNumber(ethService.getCurrentBlockNumber());
         publisherRepo.save(publisher);
 
         // Fetch entries for new publisher
@@ -59,6 +60,10 @@ public class PublisherService {
     }
 
     public void removePublisher(String address) {
+        Publisher publisher = publisherRepo.getById(address);
+        if (publisher == null) {
+            return;
+        }
         ethEventListener.unregisterPublisherEventListener(address);
         entryservice.removeEntriesByPublisher(address);
         publisherRepo.deleteById(address);

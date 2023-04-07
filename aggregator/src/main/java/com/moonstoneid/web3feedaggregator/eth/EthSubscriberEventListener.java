@@ -14,20 +14,24 @@ import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Event;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.Log;
+import org.web3j.utils.Numeric;
 
 public class EthSubscriberEventListener {
 
     private final SubscriberService subscriberService;
     private final Web3j web3j;
-    
-    private final MultiValueMap<String,Disposable> listeners = new LinkedMultiValueMap<>();
 
-    public EthSubscriberEventListener(SubscriberService subscriberService, Web3j web3j) {
+    private final MultiValueMap<String,Disposable> listeners = new LinkedMultiValueMap<>();
+    private EthService ethService;
+
+    public EthSubscriberEventListener(SubscriberService subscriberService, EthService ethService) {
         this.subscriberService = subscriberService;
-        this.web3j = web3j;
+        this.ethService = ethService;
+        this.web3j = ethService.getWeb3j();
     }
 
     public void registerSubscriberEventListeners() {
@@ -37,14 +41,13 @@ public class EthSubscriberEventListener {
     public void registerSubscriberEventListener(Subscriber subscriber) {
         String accountAddr = subscriber.getAccountAddress();
         String contractAddr = subscriber.getContractAddress();
+        String blockNumber = ethService.getCurrentBlockNumber();
 
-        EthFilter subFilter = createFilter(contractAddr, FeedSubscriber.CREATESUBSCRIPTION_EVENT);
-        Disposable sub = web3j.ethLogFlowable(subFilter).subscribe(
-                l -> onCreateSubscriptionEvent(accountAddr, l));
+        EthFilter subFilter = EthUtil.createFilter(contractAddr, blockNumber, FeedSubscriber.CREATESUBSCRIPTION_EVENT);
+        Disposable sub = web3j.ethLogFlowable(subFilter).subscribe(l -> onCreateSubscriptionEvent(accountAddr, l));
 
-        EthFilter unsubFilter = createFilter(contractAddr, FeedSubscriber.REMOVESUBSCRIPTION_EVENT);
-        Disposable unsub = web3j.ethLogFlowable(unsubFilter).subscribe(
-                l -> onRemoveSubscriptionEvent(accountAddr, l));
+        EthFilter unsubFilter = EthUtil.createFilter(contractAddr, blockNumber, FeedSubscriber.REMOVESUBSCRIPTION_EVENT);
+        Disposable unsub = web3j.ethLogFlowable(unsubFilter).subscribe(l -> onRemoveSubscriptionEvent(accountAddr, l));
 
         // Store listeners so we can unregister them later
         listeners.add(contractAddr, sub);
@@ -70,8 +73,7 @@ public class EthSubscriberEventListener {
             return Optional.empty();
         }
         String topic = log.getTopics().get(1);
-        Address address = (Address) FunctionReturnDecoder.decodeIndexedValue(topic,
-                new TypeReference<Address>() {});
+        Address address = (Address) FunctionReturnDecoder.decodeIndexedValue(topic, new TypeReference<Address>() {});
         return Optional.ofNullable(address.getValue());
     }
 
@@ -79,14 +81,6 @@ public class EthSubscriberEventListener {
         for (Disposable listener : listeners.get(subscriber.getContractAddress())) {
             listener.dispose();
         }
-    }
-
-    // TODO: Impl. smarter algorithm that only a processes only events after a specific block timestamp
-    private static EthFilter createFilter(String contractAddress, Event event) {
-        EthFilter filter = new EthFilter(DefaultBlockParameterName.EARLIEST,
-                DefaultBlockParameterName.LATEST, contractAddress);
-        filter.addSingleTopic(EventEncoder.encode(event));
-        return filter;
     }
 
 }
