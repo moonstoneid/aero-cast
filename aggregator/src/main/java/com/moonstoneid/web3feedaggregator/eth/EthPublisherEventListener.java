@@ -4,22 +4,20 @@ import java.math.BigInteger;
 import java.util.Optional;
 
 import com.moonstoneid.web3feedaggregator.eth.contracts.FeedPublisher;
-import com.moonstoneid.web3feedaggregator.model.Publisher;
 import com.moonstoneid.web3feedaggregator.service.EntryService;
 import com.moonstoneid.web3feedaggregator.service.PublisherService;
 import io.reactivex.disposables.Disposable;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.web3j.abi.EventEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.Log;
 
+@Slf4j
 public class EthPublisherEventListener {
 
     private final PublisherService publisherService;
@@ -38,11 +36,13 @@ public class EthPublisherEventListener {
     }
 
     public void registerPublisherEventListeners() {
-        publisherService.getPublishers().forEach(this::registerPublisherEventListener);
+        publisherService.getPublishers().forEach(p -> registerPublisherEventListener(
+                p.getContractAddress()));
     }
 
-    public void registerPublisherEventListener(Publisher publisher) {
-        String contractAddr = publisher.getContractAddress();
+    public void registerPublisherEventListener(String contractAddr) {
+        log.debug("Adding event listener on publisher contract '{}'.", contractAddr);
+
         String blockNumber = ethService.getCurrentBlockNumber();
 
         EthFilter subFilter = EthUtil.createFilter(contractAddr, blockNumber, FeedPublisher.NEWPUBITEM_EVENT);
@@ -50,20 +50,27 @@ public class EthPublisherEventListener {
         listeners.add(contractAddr, sub);
     }
 
-    private void onNewPubItemEvent(String pubAddress, Log log) {
-        Optional<BigInteger> id = getPubItemIdFromLog(log);
-        if (id.isPresent()) {
-            // Get pubItem from contract
-            FeedPublisher.PubItem pubItem = ethService.getPubItem(pubAddress, id.get());
-            if (pubItem != null && pubItem.data != null) {
-                String guid = pubItem.data;
-                entryService.createEntry(guid, pubAddress);
-            }
+    private void onNewPubItemEvent(String contractAddr, Log log) {
+        Optional<BigInteger> pubItemId = getPubItemIdFromLog(log);
+        if (pubItemId.isEmpty()) {
+            return;
         }
+
+        // Get pubItem from contract
+        FeedPublisher.PubItem pubItem = ethService.getPubItem(contractAddr, pubItemId.get());
+        if (pubItem == null || pubItem.data == null) {
+            return;
+        }
+
+        // Fetch entry
+        String guid = pubItem.data;
+        entryService.fetchEntry(contractAddr, guid);
     }
 
-    public void unregisterPublisherEventListener(String publisherAddr) {
-        for (Disposable d : listeners.get(publisherAddr)) {
+    public void unregisterPublisherEventListener(String contractAddr) {
+        log.debug("Removing event listener on publisher contract '{}'.", contractAddr);
+
+        for (Disposable d : listeners.get(contractAddr)) {
             d.dispose();
         }
     }

@@ -17,11 +17,13 @@ import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class EntryService {
 
     private final EntryRepo entryRepo;
@@ -41,58 +43,63 @@ public class EntryService {
         publisherRepo.findAll().forEach(pub -> fetchEntries(pub.getContractAddress()));
     }
 
-    public void fetchEntries(String pubAddr) {
-        List<FeedPublisher.PubItem> pubItems = ethService.getPublisherItems(pubAddr);
+    public void fetchEntries(String pubAddress) {
+        log.info("Fetching entries for publisher '{}' ...", pubAddress);
+
+        List<FeedPublisher.PubItem> pubItems = ethService.getPublisherItems(pubAddress);
         pubItems.forEach(pubItem -> {
+            Publisher publisher =  publisherRepo.getById(pubAddress);
+            SyndFeed feed = getFeed(publisher);
+
             String guid = pubItem.data;
-            createEntry(guid, pubAddr);
+            createEntry(pubAddress, feed, guid);
         });
     }
 
-    public void createEntry(String guid, String pubAddress) {
-        Publisher pub =  publisherRepo.getById(pubAddress);
-        SyndFeed feed = getFeed(pub.getFeedUrl());
+    public void fetchEntry(String pubAddress, String guid) {
+        Publisher publisher =  publisherRepo.getById(pubAddress);
+        SyndFeed feed = getFeed(publisher);
 
-        if (pubItemExists(guid, feed)) {
-            SyndEntry feedEntry = getEntry(guid, feed);
+        createEntry(pubAddress, feed, guid);
+    }
 
-            if (!entryRepo.existsByPubAddrAndEntryURL(pub.getContractAddress(), guid)) {
-                saveEntry(pub.getContractAddress(), feedEntry);
-            }
+    private void createEntry(String pubAddress, SyndFeed feed, String guid) {
+        if (!pubItemExists(feed, guid)) {
+            return;
+        }
+
+        log.info("Fetching entry '{}/{}' ...", pubAddress, guid);
+
+        SyndEntry feedEntry = getEntry(feed, guid);
+        if (!entryRepo.existsByPubAddrAndEntryURL(pubAddress, guid)) {
+            saveEntry(pubAddress, feedEntry);
         }
     }
 
     private void saveEntry(String pubAddress, SyndEntry feedEntry) {
         Entry entry = new Entry();
         entry.setPubContractAddress(pubAddress.toLowerCase());
-        entry.setUrl(feedEntry.getUri());
+        entry.setNumber(getNextPubItemNumber(pubAddress));
         entry.setTitle(feedEntry.getTitle());
         entry.setDescription(feedEntry.getDescription().getValue());
         entry.setDate(feedEntry.getPublishedDate().toInstant().atOffset(ZoneOffset.UTC));
-        entry.setNumber(getNumber(pubAddress));
+        entry.setUrl(feedEntry.getUri());
         entryRepo.save(entry);
     }
 
-    private SyndFeed getFeed(String url) {
+    private SyndFeed getFeed(Publisher publisher) {
         SyndFeed feed;
         try {
-            feed = new SyndFeedInput().build(new XmlReader(new URL(url)));
+            feed = new SyndFeedInput().build(new XmlReader(new URL(publisher.getFeedUrl())));
         } catch (FeedException | IOException e) {
-            throw new RuntimeException("Cannot read RSS feed from URL: " + url);
+            log.info("Could not read RSS feed from URL '{}' for for publisher '{}' ...",
+                    publisher.getFeedUrl(), publisher.getContractAddress());
+            throw new RuntimeException("Could not read RSS feed from URL: " + publisher.getFeedUrl());
         }
         return feed;
     }
 
-    private int getNumber(String pubAddress) {
-        Optional<Integer> max = entryRepo.findMaxNumberByPublisherContractAddress(pubAddress);
-        if (max.isEmpty()) {
-            return 1;
-        } else {
-            return max.get() + 1;
-        }
-    }
-
-    private boolean pubItemExists(String guid, SyndFeed feed) {
+    private boolean pubItemExists(SyndFeed feed, String guid) {
         boolean exists = false;
         for (SyndEntry feedEntry : feed.getEntries()) {
             if (feedEntry.getUri().equals(guid)) {
@@ -102,7 +109,16 @@ public class EntryService {
         return exists;
     }
 
-    private SyndEntry getEntry(String guid, SyndFeed feed) {
+    private int getNextPubItemNumber(String pubAddress) {
+        Optional<Integer> max = entryRepo.findMaxNumberByPublisherContractAddress(pubAddress);
+        if (max.isEmpty()) {
+            return 1;
+        } else {
+            return max.get() + 1;
+        }
+    }
+
+    private SyndEntry getEntry(SyndFeed feed, String guid) {
         SyndEntry entry = null;
         for (SyndEntry feedEntry : feed.getEntries()) {
             if (feedEntry.getUri().equals(guid)) {

@@ -6,27 +6,24 @@ import com.moonstoneid.web3feedaggregator.eth.contracts.FeedSubscriber;
 import com.moonstoneid.web3feedaggregator.model.Subscriber;
 import com.moonstoneid.web3feedaggregator.service.SubscriberService;
 import io.reactivex.disposables.Disposable;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.web3j.abi.EventEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.Event;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameter;
-import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.Log;
-import org.web3j.utils.Numeric;
 
+@Slf4j
 public class EthSubscriberEventListener {
 
     private final SubscriberService subscriberService;
+    private final EthService ethService;
     private final Web3j web3j;
 
     private final MultiValueMap<String,Disposable> listeners = new LinkedMultiValueMap<>();
-    private EthService ethService;
 
     public EthSubscriberEventListener(SubscriberService subscriberService, EthService ethService) {
         this.subscriberService = subscriberService;
@@ -42,6 +39,8 @@ public class EthSubscriberEventListener {
         String accountAddr = subscriber.getAccountAddress();
         String contractAddr = subscriber.getContractAddress();
         String blockNumber = ethService.getCurrentBlockNumber();
+
+        log.debug("Adding event listener on subscriber contract '{}'.", contractAddr);
 
         EthFilter subFilter = EthUtil.createFilter(contractAddr, blockNumber, FeedSubscriber.CREATESUBSCRIPTION_EVENT);
         Disposable sub = web3j.ethLogFlowable(subFilter).subscribe(l -> onCreateSubscriptionEvent(accountAddr, l));
@@ -69,7 +68,7 @@ public class EthSubscriberEventListener {
     }
 
     private static Optional<String> getPublisherAddressFromLog(Log log) {
-        if(log.getTopics().size() <= 1) {
+        if (log.getTopics().size() <= 1) {
             return Optional.empty();
         }
         String topic = log.getTopics().get(1);
@@ -78,6 +77,9 @@ public class EthSubscriberEventListener {
     }
 
     public void unregisterSubscriberEventListener(Subscriber subscriber) {
+        log.debug("Removing event listener on subscriber contract '{}'.",
+                subscriber.getContractAddress());
+
         for (Disposable listener : listeners.get(subscriber.getContractAddress())) {
             listener.dispose();
         }

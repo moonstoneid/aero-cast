@@ -15,11 +15,13 @@ import com.moonstoneid.web3feedaggregator.model.Subscription;
 import com.moonstoneid.web3feedaggregator.repo.EntryRepo;
 import com.moonstoneid.web3feedaggregator.repo.SubscriberRepo;
 import com.moonstoneid.web3feedaggregator.repo.SubscriptionRepo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class SubscriberService {
 
     private final SubscriberRepo subscriberRepo;
@@ -58,12 +60,16 @@ public class SubscriberService {
     }
 
     public void createSubscriber(String address) {
+        log.info("Trying to register subscriber '{}' ...", address);
+
         if (subscriberRepo.existsById(address)) {
+            log.info("Subscriber '{}' is already registered.", address);
             return;
         }
 
         String contractAddress = ethService.getSubscriberContractAddress(address);
         if (contractAddress == null) {
+            log.error("A contract for subscriber '{}' was not found!", address);
             throw new NotFoundException("Subscriber was not found!");
         }
 
@@ -87,16 +93,25 @@ public class SubscriberService {
 
         subscriberRepo.save(subscriber);
 
+        log.info("Subscriber '{}' with contract '{}' has been registered.", address, contractAddress);
+
         ethEventListener.registerSubscriberEventListener(subscriber);
     }
 
     public void removeSubscriber(String address) {
+        log.info("Trying to unregister subscriber '{}' ...", address);
+
         Subscriber subscriber = subscriberRepo.getById(address);
         if (subscriber == null) {
+            log.info("Subscriber '{}' was not found.", address);
             return;
         }
+
         ethEventListener.unregisterSubscriberEventListener(subscriber);
+
         subscriberRepo.deleteById(address);
+
+        log.info("Subscriber '{}' has been unregistered.", address);
     }
 
     public void addSubscription(String address, String pubAddress) {
@@ -106,7 +121,10 @@ public class SubscriberService {
             return;
         }
 
-        // Create publisher if not exists publisher
+        log.info("Adding subscription '{}/{}' of subscriber '{}' ...",
+                subscriber.getContractAddress(), pubAddress, address);
+
+        // Create publisher if publisher does not exists
         publisherService.createPublisher(pubAddress);
 
         // Abort if subscriber already has subscription
@@ -134,6 +152,9 @@ public class SubscriberService {
         if (subscriber == null) {
             return;
         }
+
+        log.info("Removing subscription '{}/{}' of subscriber '{}' ...",
+                subscriber.getContractAddress(), pubAddress, address);
 
         subscriber.getSubscriptions().removeIf(s -> s.getPubContractAddress().equalsIgnoreCase(pubAddress));
         if (subscriber.getSubscriptions().isEmpty()) {
