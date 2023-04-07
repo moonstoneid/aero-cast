@@ -39,11 +39,15 @@ public class EntryService {
     @EventListener(ApplicationReadyEvent.class)
     public void fetchEntries() {
         publisherRepo.findAll().forEach(pub -> {
-            List<FeedPublisher.PubItem> pubItems = ethService.getPublisherItems(pub.getContractAddress());
-            pubItems.forEach(pubItem -> {
-                String guid = pubItem.data;
-                createEntry(guid, pub.getContractAddress());
-            });
+            fetchEntries(pub.getContractAddress());
+        });
+    }
+
+    public void fetchEntries(String pubAddr) {
+        List<FeedPublisher.PubItem> pubItems = ethService.getPublisherItems(pubAddr);
+        pubItems.forEach(pubItem -> {
+            String guid = pubItem.data;
+            createEntry(guid, pubAddr);
         });
     }
 

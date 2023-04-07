@@ -49,7 +49,7 @@ public class PublisherService {
         publisherRepo.save(publisher);
 
         // Fetch entries for new publisher
-        entryservice.fetchEntries();
+        entryservice.fetchEntries(address);
 
         ethEventListener.registerPublisherEventListener(publisher);
 
