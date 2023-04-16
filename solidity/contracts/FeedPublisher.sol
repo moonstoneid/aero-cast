@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.12;
 
-import "hardhat/console.sol";
+import "@ganache/console.log/console.sol";
 
 import "./Ownable.sol";
 
@@ -20,7 +20,7 @@ contract FeedPublisher is Ownable {
     PubItem[] private _pubItems;
     
     constructor() {
-        
+        console.log("Publisher contract has been constructed!");
     }
 
     function setFeedUrl(string memory feedUrl) public onlyOwner {

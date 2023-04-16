@@ -1,52 +1,35 @@
-const hre = require("hardhat");
+const { getAddresses, getAccounts, getErrorMessage } = require('./helpers/utils');
 
-const pubContractMeta = require('../artifacts/contracts/FeedPublisher.sol/FeedPublisher.json');
-const subContractMeta = require('../artifacts/contracts/FeedSubscriber.sol/FeedSubscriber.json');
+const FeedPublisher = artifacts.require("./FeedPublisher.sol");
+const FeedSubscriber = artifacts.require("./FeedSubscriber.sol");
 
-async function main() {
-  // Get signers
-  const [main, pub, sub] = await hre.ethers.getSigners();
-  console.log(`Main address: ${main.address}`);
-  console.log(`Pub address: ${pub.address}`);
-  console.log(`Sub address: ${sub.address}`);
+const main = async (callback) => {
+  try {
+    const addresses = getAddresses();
+    const accounts = await getAccounts(web3);
 
+    // Get subscriber account
+    const sub = accounts[2];
+    
+    // Get publisher contract
+    const pubContr = await FeedPublisher.at(addresses['publisher']);
 
-  // Create publisher
-  const pubContr = await getPublisher("0xa16E02E87b7454126E5E10d957A927A7F5B5d2be");
-  // Create subscriber
-  const subContr = await getSubscriber("0xB7A5bd0345EF1Cc5E66bf61BdeC17D2461fBd968");
+    // Get subscriber contract
+    const subContr = await FeedSubscriber.at(addresses['subscriber']);
 
-  // Subscribe
-  await subContr.connect(sub).subscribe(pubContr.address);
+    // Subscribe
+    await subContr.subscribe(pubContr.address, {from: sub});
 
-  // Get subscriptions
-  getSubscriptions(subContr);
-
-}
-
-
-async function getPublisher(pubAddress) {
-  const MyContract = await ethers.getContractFactory("FeedPublisher");
-  const contract = await MyContract.attach(pubAddress);
-  return contract;
-}
-
-async function getSubscriber(subAddress) {
-  const MyContract = await ethers.getContractFactory("FeedSubscriber");
-  const contract = await MyContract.attach(subAddress);
-  return contract;
-}
-
-async function getSubscriptions(subContr) {
-  const subscriptions = await subContr.getSubscriptions();
-  console.log(Date.now() + " Subscriptions:");
-  for (let s of subscriptions) {
-    console.log(`- pubAddress: ${s.pubAddress}, timestamp: ${s.timestamp}`);
+    // Get subscriptions
+    const subscriptions = await subContr.getSubscriptions({from: sub});
+    console.log("Subscriptions:");
+    for (let s of subscriptions) {
+      console.log(`- address: ${s.pubAddress}, timestamp: ${s.timestamp}`);
+    }
+  } catch(err) {
+    console.log(`Error: ${getErrorMessage(err)}`);
   }
+  callback();
 }
 
-
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+module.exports = main;

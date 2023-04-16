@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.12;
 
-import "hardhat/console.sol";
+import "@ganache/console.log/console.sol";
 
 import "./FeedPublisher.sol";
 import "./FeedSubscriber.sol";
@@ -15,7 +15,7 @@ contract FeedRegistry {
     mapping(address => address) public subscriberContracts;
 
     constructor() {
-        //console.log("Registry contract has been constructed!");
+        console.log("Registry contract has been constructed!");
     }
 
     /**
@@ -26,7 +26,7 @@ contract FeedRegistry {
         c.setFeedUrl(feedUrl);
         c.setOwner(msg.sender);
         address ca = address(c);
-        //console.log("Account %s created publisher contract %s.", msg.sender, ca);
+        console.log("Account %s created publisher contract %s.", msg.sender, ca);
         publisherContracts[msg.sender] = ca;
     }
 
@@ -35,7 +35,7 @@ contract FeedRegistry {
     **/
     function getPublisherContract() public view returns (address) {
         address ca = publisherContracts[msg.sender];
-        //console.log("Account %s has publisher contract %s.", msg.sender, ca);
+        console.log("Account %s has publisher contract %s.", msg.sender, ca);
         return ca;
     }
 
@@ -46,7 +46,7 @@ contract FeedRegistry {
         FeedSubscriber c = new FeedSubscriber();
         c.setOwner(msg.sender);
         address ca = address(c);
-        //console.log("Account %s created subscriber contract %s.", msg.sender, ca);
+        console.log("Account %s created subscriber contract %s.", msg.sender, ca);
         subscriberContracts[msg.sender] = ca;
     }
 
@@ -55,16 +55,16 @@ contract FeedRegistry {
     **/
     function getSubscriberContract() public view returns (address) {
         address ca = subscriberContracts[msg.sender];
-        //console.log("Account %s has subscriber contract %s.", msg.sender, ca);
+        console.log("Account %s has subscriber contract %s.", msg.sender, ca);
         return ca;
     }
 
     /**
-* @notice Returns the sender's subscriber contract
+    * @notice Returns the sender's subscriber contract
     **/
     function getSubscriberContractByAddress(address addr) public view returns (address) {
         address ca = subscriberContracts[addr];
-        //console.log("Account %s has subscriber contract %s.", msg.sender, ca);
+        console.log("Account %s has subscriber contract %s.", msg.sender, ca);
         return ca;
     }
 

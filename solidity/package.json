@@ -1,18 +1,12 @@
 {
-  "name": "web3-feed-backend",
-  "description": "",
+  "name": "test",
   "version": "1.0.0",
-  "scripts": {},
-  "devDependencies": {
-    "@nomicfoundation/hardhat-chai-matchers": "^1.0.5",
-    "@nomiclabs/hardhat-ethers": "^2.2.2",
-    "chai": "^4.3.7",
-    "ethers": "^5.7.2",
-    "hardhat": "^2.12.6"
-  },
   "dependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
-    "@openzeppelin/contracts": "^4.8.1",
+    "@ganache/console.log": "^0.4.0",
     "dotenv": "^16.0.3"
+  },
+  "scripts": {
+    "ganache": "ganache --chain.chainId=31337 --wallet.mnemonic='test test test test test test test test test test test junk'",
+    "ganache-persistent": "ganache --chain.chainId=31337 --wallet.mnemonic='test test test test test test test test test test test junk' --database.dbPath=ganache_data"
   }
 }
