@@ -2,6 +2,7 @@ package com.moonstoneid.web3feedaggregator.config;
 
 import com.moonstoneid.web3feedaggregator.AppProperties;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.web3j.protocol.Web3j;
@@ -24,7 +25,16 @@ public class EthConfig {
             log.info("No Ethereum API URL was configured.");
             return null;
         }
-        return Web3j.build(new HttpService(ethApiUrl));
+        HttpService httpService = new HttpService(ethApiUrl, initHttpClient());
+        return Web3j.build(httpService);
+    }
+
+    protected OkHttpClient initHttpClient() {
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        if (log.isDebugEnabled()) {
+            builder.addNetworkInterceptor(new LogInterceptor());
+        }
+        return builder.build();
     }
 
 }
