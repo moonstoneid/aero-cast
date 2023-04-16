@@ -24,3 +24,9 @@ https://trufflesuite.com/docs/ganache/reference/cli-options
 
 # Ganache Logging
 https://trufflesuite.com/blog/three-new-ganache-features-to-improve-your-developer-experience/#ability-to-use-consolelog-from-solidity
+
+# Solc compile
+solc contract.sol --bin --abi --optimize -o . --overwrite
+
+# Web3j Create Java Wrapper
+web3j generate solidity -a contract.abi -b contract .bin -o . -p package.name
