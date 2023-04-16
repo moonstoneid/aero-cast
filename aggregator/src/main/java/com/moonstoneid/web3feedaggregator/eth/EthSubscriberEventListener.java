@@ -1,5 +1,6 @@
 package com.moonstoneid.web3feedaggregator.eth;
 
+import java.math.BigInteger;
 import java.util.Optional;
 
 import com.moonstoneid.web3feedaggregator.eth.contracts.FeedSubscriber;
@@ -15,6 +16,7 @@ import org.web3j.abi.datatypes.Address;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.Log;
+import org.web3j.utils.Numeric;
 
 @Slf4j
 public class EthSubscriberEventListener {
@@ -38,7 +40,7 @@ public class EthSubscriberEventListener {
     public void registerSubscriberEventListener(Subscriber subscriber) {
         String accountAddr = subscriber.getAccountAddress();
         String contractAddr = subscriber.getContractAddress();
-        String blockNumber = ethService.getCurrentBlockNumber();
+        BigInteger blockNumber = Numeric.toBigInt(subscriber.getBlockNumber());
 
         log.debug("Adding event listener on subscriber contract '{}'.",
                 EthUtil.shortenAddress(contractAddr));

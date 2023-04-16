@@ -10,8 +10,8 @@ import com.moonstoneid.web3feedaggregator.eth.contracts.FeedRegistry;
 import com.moonstoneid.web3feedaggregator.eth.contracts.FeedSubscriber;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.Keys;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.tx.gas.ContractGasProvider;
 
 @Service
@@ -97,16 +97,20 @@ public class EthService {
         }
     }
 
-    public String getCurrentBlockNumber() {
+    public BigInteger getCurrentBlockNumber() {
         try {
-            return web3j.ethBlockNumber().sendAsync().get().getBlockNumber().toString();
+            return web3j.ethBlockNumber().sendAsync().get().getBlockNumber();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     private Credentials getCredentials() {
-        return Credentials.create(appProperties.getEth().getPrivateKey());
+        try {
+            return Credentials.create(Keys.createEcKeyPair());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static final ContractGasProvider contractGasProvider = new ContractGasProvider() {

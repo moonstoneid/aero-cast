@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import org.web3j.utils.Numeric;
 
 @Service
 @Slf4j
@@ -90,7 +91,7 @@ public class SubscriberService {
         subscriber.setAccountAddress(address.toLowerCase());
         subscriber.setContractAddress(contractAddress);
         subscriber.setSubscriptions(subscriptions);
-        subscriber.setBlockNumber(ethService.getCurrentBlockNumber());
+        subscriber.setBlockNumber(Numeric.toHexStringWithPrefix((ethService.getCurrentBlockNumber())));
 
         subscriberRepo.save(subscriber);
 
@@ -145,7 +146,7 @@ public class SubscriberService {
         subscriber.getSubscriptions().add(subscriptions);
 
         // Update block number
-        subscriber.setBlockNumber(ethService.getCurrentBlockNumber());
+        subscriber.setBlockNumber(Numeric.toHexStringWithPrefix(ethService.getCurrentBlockNumber()));
         subscriberRepo.save(subscriber);
     }
 

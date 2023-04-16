@@ -39,11 +39,6 @@ public class EntryService {
         this.ethService = ethService;
     }
 
-    @EventListener(ApplicationReadyEvent.class)
-    public void fetchEntries() {
-        publisherRepo.findAll().forEach(pub -> fetchEntries(pub.getContractAddress()));
-    }
-
     public void fetchEntries(String pubAddress) {
         log.info("Fetching entries for publisher '{}' ...", EthUtil.shortenAddress(pubAddress));
 

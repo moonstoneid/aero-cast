@@ -1,6 +1,7 @@
 package com.moonstoneid.web3feedaggregator.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.moonstoneid.web3feedaggregator.eth.EthPublisherEventListener;
 import com.moonstoneid.web3feedaggregator.eth.EthService;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import org.web3j.utils.Numeric;
 
 @Service
 @Slf4j
@@ -53,7 +55,7 @@ public class PublisherService {
         publisher = new Publisher();
         publisher.setContractAddress(address.toLowerCase());
         publisher.setFeedUrl(ethService.getPublisherFeedUrl(address));
-        publisher.setBlockNumber(ethService.getCurrentBlockNumber());
+        publisher.setBlockNumber(Numeric.toHexStringWithPrefix(ethService.getCurrentBlockNumber()));
         publisherRepo.save(publisher);
 
         log.info("Publisher '{}' was created.", EthUtil.shortenAddress(address));
@@ -79,6 +81,20 @@ public class PublisherService {
         publisherRepo.deleteById(address);
 
         log.info("Publisher '{}' has been removed.", EthUtil.shortenAddress(address));
+    }
+
+    public Optional<Publisher> findPublisher(String address) {
+        return publisherRepo.findById(address);
+    }
+
+    public void updateBlockNumber(String contractAddr, String blockNumber) {
+        Publisher publisher = publisherRepo.getById(contractAddr);
+        if (publisher == null) {
+            log.info("Publisher '{}' was not found.", EthUtil.shortenAddress(contractAddr));
+            return;
+        }
+        publisher.setBlockNumber(blockNumber);
+        publisherRepo.save(publisher);
     }
 
 }

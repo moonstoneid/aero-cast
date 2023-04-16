@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.Optional;
 
 import com.moonstoneid.web3feedaggregator.eth.contracts.FeedPublisher;
+import com.moonstoneid.web3feedaggregator.model.Publisher;
 import com.moonstoneid.web3feedaggregator.service.EntryService;
 import com.moonstoneid.web3feedaggregator.service.PublisherService;
 import io.reactivex.disposables.Disposable;
@@ -16,6 +17,7 @@ import org.web3j.abi.datatypes.Uint;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.Log;
+import org.web3j.utils.Numeric;
 
 @Slf4j
 public class EthPublisherEventListener {
@@ -44,7 +46,11 @@ public class EthPublisherEventListener {
         log.debug("Adding event listener on publisher contract '{}'.",
                 EthUtil.shortenAddress(contractAddr));
 
-        String blockNumber = ethService.getCurrentBlockNumber();
+        Optional<Publisher> pub = publisherService.findPublisher(contractAddr);
+        if (pub.isEmpty()) {
+            return;
+        }
+        BigInteger blockNumber = Numeric.toBigInt(pub.get().getBlockNumber());
 
         EthFilter subFilter = EthUtil.createFilter(contractAddr, blockNumber, FeedPublisher.NEWPUBITEM_EVENT);
         Disposable sub = web3j.ethLogFlowable(subFilter).subscribe(l -> onNewPubItemEvent(contractAddr, l));
@@ -62,6 +68,9 @@ public class EthPublisherEventListener {
         if (pubItem == null || pubItem.data == null) {
             return;
         }
+
+        // Update block number in publisher db
+        publisherService.updateBlockNumber(contractAddr, Numeric.toHexStringWithPrefix(log.getBlockNumber()));
 
         // Fetch entry
         String guid = pubItem.data;
