@@ -37,7 +37,7 @@ public class SubscriberController {
     @PostMapping(value = "/{address}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void registerSubscriber(@PathVariable("address") String address) {
-        subscriberService.createSubscriber(address);
+        subscriberService.createSubscriberIfNotExists(address);
     }
 
     @DeleteMapping(value = "/{address}")

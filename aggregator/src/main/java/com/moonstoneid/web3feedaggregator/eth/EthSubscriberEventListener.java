@@ -8,6 +8,9 @@ import com.moonstoneid.web3feedaggregator.model.Subscriber;
 import com.moonstoneid.web3feedaggregator.service.SubscriberService;
 import io.reactivex.disposables.Disposable;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.web3j.abi.FunctionReturnDecoder;
@@ -19,73 +22,85 @@ import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.utils.Numeric;
 
 @Slf4j
+@Component
 public class EthSubscriberEventListener {
 
-    private final SubscriberService subscriberService;
+    private final SubscriberService subService;
     private final EthService ethService;
     private final Web3j web3j;
 
     private final MultiValueMap<String,Disposable> listeners = new LinkedMultiValueMap<>();
 
-    public EthSubscriberEventListener(SubscriberService subscriberService, EthService ethService) {
-        this.subscriberService = subscriberService;
+    public EthSubscriberEventListener(SubscriberService subService, EthService ethService) {
+        this.subService = subService;
         this.ethService = ethService;
         this.web3j = ethService.getWeb3j();
     }
 
-    public void registerSubscriberEventListeners() {
-        subscriberService.getSubscribers().forEach(this::registerSubscriberEventListener);
+    // Register listeners after Spring Boot has started
+    @EventListener(ApplicationReadyEvent.class)
+    public void initEventListener() {
+        registerSubEventListeners();
     }
 
-    public void registerSubscriberEventListener(Subscriber subscriber) {
-        String accountAddr = subscriber.getAccountAddress();
-        String contractAddr = subscriber.getContractAddress();
+    public void registerSubEventListeners() {
+        subService.getSubscribers().forEach(this::registerSubEventListener);
+    }
+
+    public void registerSubEventListener(Subscriber subscriber) {
+        String subAccAddr = subscriber.getAccountAddress();
+        String subContrAddr = subscriber.getContractAddress();
         BigInteger blockNumber = Numeric.toBigInt(subscriber.getBlockNumber());
 
         log.debug("Adding event listener on subscriber contract '{}'.",
-                EthUtil.shortenAddress(contractAddr));
+                EthUtil.shortenAddress(subContrAddr));
 
-        EthFilter subFilter = EthUtil.createFilter(contractAddr, blockNumber, FeedSubscriber.CREATESUBSCRIPTION_EVENT);
-        Disposable sub = web3j.ethLogFlowable(subFilter).subscribe(l -> onCreateSubscriptionEvent(accountAddr, l));
+        EthFilter subFilter = EthUtil.createFilter(subContrAddr, blockNumber,
+                FeedSubscriber.CREATESUBSCRIPTION_EVENT);
+        Disposable sub = web3j.ethLogFlowable(subFilter).subscribe(l ->
+                onCreateSubEvent(subAccAddr, l));
 
-        EthFilter unsubFilter = EthUtil.createFilter(contractAddr, blockNumber, FeedSubscriber.REMOVESUBSCRIPTION_EVENT);
-        Disposable unsub = web3j.ethLogFlowable(unsubFilter).subscribe(l -> onRemoveSubscriptionEvent(accountAddr, l));
+        EthFilter unsubFilter = EthUtil.createFilter(subContrAddr, blockNumber,
+                FeedSubscriber.REMOVESUBSCRIPTION_EVENT);
+        Disposable unsub = web3j.ethLogFlowable(unsubFilter).subscribe(l ->
+                onRemoveSubEvent(subAccAddr, l));
 
         // Store listeners so we can unregister them later
-        listeners.add(contractAddr, sub);
-        listeners.add(contractAddr, unsub);
+        listeners.add(subContrAddr, sub);
+        listeners.add(subContrAddr, unsub);
     }
 
-    private void onCreateSubscriptionEvent(String subAddress, Log log) {
-        Optional<String> pubAddr = getPublisherAddressFromLog(log);
-        if (pubAddr.isPresent()) {
-            subscriberService.addSubscription(subAddress, pubAddr.get());
-        }
-    }
-
-    private void onRemoveSubscriptionEvent(String subAddress, Log log) {
-        Optional<String> pubAddr = getPublisherAddressFromLog(log);
-        if (pubAddr.isPresent()) {
-            subscriberService.removeSubscription(subAddress, pubAddr.get());
-        }
-    }
-
-    private static Optional<String> getPublisherAddressFromLog(Log log) {
-        if (log.getTopics().size() <= 1) {
-            return Optional.empty();
-        }
-        String topic = log.getTopics().get(1);
-        Address address = (Address) FunctionReturnDecoder.decodeIndexedValue(topic, new TypeReference<Address>() {});
-        return Optional.ofNullable(address.getValue());
-    }
-
-    public void unregisterSubscriberEventListener(Subscriber subscriber) {
+    public void unregisterSubEventListener(Subscriber subscriber) {
         log.debug("Removing event listener on subscriber contract '{}'.",
                 EthUtil.shortenAddress(subscriber.getContractAddress()));
 
         for (Disposable listener : listeners.get(subscriber.getContractAddress())) {
             listener.dispose();
         }
+    }
+
+    private void onCreateSubEvent(String subAccAddr, Log log) {
+        Optional<String> pubContrAddr = getPubAddressFromLog(log);
+        if (pubContrAddr.isPresent()) {
+            subService.addSubscription(subAccAddr, pubContrAddr.get());
+        }
+    }
+
+    private void onRemoveSubEvent(String subAccAddr, Log log) {
+        Optional<String> pubContrAddr = getPubAddressFromLog(log);
+        if (pubContrAddr.isPresent()) {
+            subService.removeSubscription(subAccAddr, pubContrAddr.get());
+        }
+    }
+
+    private static Optional<String> getPubAddressFromLog(Log log) {
+        if (log.getTopics().size() <= 1) {
+            return Optional.empty();
+        }
+        String topic = log.getTopics().get(1);
+        Address addr = (Address) FunctionReturnDecoder.decodeIndexedValue(topic,
+                new TypeReference<Address>() {});
+        return Optional.ofNullable(addr.getValue());
     }
 
 }

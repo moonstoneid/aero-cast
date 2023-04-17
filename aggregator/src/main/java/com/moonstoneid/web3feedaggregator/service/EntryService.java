@@ -19,8 +19,6 @@ import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -39,43 +37,43 @@ public class EntryService {
         this.ethService = ethService;
     }
 
-    public void fetchEntries(String pubAddress) {
-        log.info("Fetching entries for publisher '{}' ...", EthUtil.shortenAddress(pubAddress));
+    public void fetchEntries(String pubContrAddr) {
+        log.info("Fetching entries for publisher '{}' ...", EthUtil.shortenAddress(pubContrAddr));
 
-        List<FeedPublisher.PubItem> pubItems = ethService.getPublisherItems(pubAddress);
+        List<FeedPublisher.PubItem> pubItems = ethService.getPublisherItems(pubContrAddr);
         pubItems.forEach(pubItem -> {
-            Publisher publisher =  publisherRepo.getById(pubAddress);
-            SyndFeed feed = getFeed(publisher);
-
             String guid = pubItem.data;
-            createEntry(pubAddress, feed, guid);
+            createEntry(pubContrAddr, guid);
         });
     }
 
-    public void fetchEntry(String pubAddress, String guid) {
-        Publisher publisher =  publisherRepo.getById(pubAddress);
-        SyndFeed feed = getFeed(publisher);
+    public void createEntry(String pubContrAddr, String guid) {
+        Optional<Publisher> pub = publisherRepo.findById(pubContrAddr);
+        if (pub.isEmpty()) {
+            return;
+        }
+        SyndFeed feed = getFeed(pub.get());
 
-        createEntry(pubAddress, feed, guid);
+        createEntry(pubContrAddr, guid, feed);
     }
 
-    private void createEntry(String pubAddress, SyndFeed feed, String guid) {
+    private void createEntry(String pubContrAddr, String guid, SyndFeed feed) {
         if (!pubItemExists(feed, guid)) {
             return;
         }
 
-        log.info("Fetching entry '{}/{}' ...", EthUtil.shortenAddress(pubAddress), guid);
+        log.info("Fetching entry '{}/{}' ...", EthUtil.shortenAddress(pubContrAddr), guid);
 
         SyndEntry feedEntry = getEntry(feed, guid);
-        if (!entryRepo.existsByPubAddrAndEntryURL(pubAddress, guid)) {
-            saveEntry(pubAddress, feedEntry);
+        if (!entryRepo.existsByPubAddrAndEntryURL(pubContrAddr, guid)) {
+            saveEntry(pubContrAddr, feedEntry);
         }
     }
 
-    private void saveEntry(String pubAddress, SyndEntry feedEntry) {
+    private void saveEntry(String pubContrAddr, SyndEntry feedEntry) {
         Entry entry = new Entry();
-        entry.setPubContractAddress(pubAddress.toLowerCase());
-        entry.setNumber(getNextPubItemNumber(pubAddress));
+        entry.setPubContractAddress(pubContrAddr.toLowerCase());
+        entry.setNumber(getNextPubItemNumber(pubContrAddr));
         entry.setTitle(feedEntry.getTitle());
         entry.setDescription(feedEntry.getDescription().getValue());
         entry.setDate(feedEntry.getPublishedDate().toInstant().atOffset(ZoneOffset.UTC));
@@ -105,8 +103,8 @@ public class EntryService {
         return exists;
     }
 
-    private int getNextPubItemNumber(String pubAddress) {
-        Optional<Integer> max = entryRepo.findMaxNumberByPublisherContractAddress(pubAddress);
+    private int getNextPubItemNumber(String pubContrAddr) {
+        Optional<Integer> max = entryRepo.findMaxNumberByPublisherContractAddress(pubContrAddr);
         if (max.isEmpty()) {
             return 1;
         } else {
@@ -124,8 +122,8 @@ public class EntryService {
         return entry;
     }
 
-    public void removeEntriesByPublisher(String pubAddress) {
-        entryRepo.deleteAllByPubContractAddress(pubAddress);
+    public void removeEntriesByPublisher(String pubContrAddr) {
+        entryRepo.deleteAllByPubContractAddress(pubContrAddr);
     }
 
 }

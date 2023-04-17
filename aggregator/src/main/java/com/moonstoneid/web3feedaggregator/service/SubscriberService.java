@@ -17,8 +17,6 @@ import com.moonstoneid.web3feedaggregator.repo.EntryRepo;
 import com.moonstoneid.web3feedaggregator.repo.SubscriberRepo;
 import com.moonstoneid.web3feedaggregator.repo.SubscriptionRepo;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.web3j.utils.Numeric;
 
@@ -30,9 +28,8 @@ public class SubscriberService {
     private final SubscriptionRepo subscriptionRepo;
     private final PublisherService publisherService;
     private final EntryRepo entryRepo;
-
     private final EthService ethService;
-    private final EthSubscriberEventListener ethEventListener;
+    private final EthSubscriberEventListener ethSubEventListener;
 
     public SubscriberService(SubscriberRepo subscriberRepo, SubscriptionRepo subscriptionRepo,
             PublisherService publisherService, EntryRepo entryRepo, EthService ethService) {
@@ -42,152 +39,162 @@ public class SubscriberService {
         this.entryRepo = entryRepo;
 
         this.ethService = ethService;
-        this.ethEventListener = new EthSubscriberEventListener(this, ethService);
-    }
-
-    // Register listeners after Spring Boot has started
-    @EventListener(ApplicationReadyEvent.class)
-    public void initEventListener() {
-        ethEventListener.registerSubscriberEventListeners();
+        this.ethSubEventListener = new EthSubscriberEventListener(this, ethService);
     }
 
     public List<Subscriber> getSubscribers() {
         return subscriberRepo.findAll();
     }
 
-    public Subscriber findSubscriberByAccountAddress(String address) {
-        Optional<Subscriber> subscriber = subscriberRepo.findById(address);
+    public Subscriber findSubscriberByAccountAddress(String subAccAddr) {
+        Optional<Subscriber> subscriber = subscriberRepo.findById(subAccAddr);
         return subscriber
                 .orElseThrow(() -> new NotFoundException("Subscriber was not found!"));
     }
 
-    public void createSubscriber(String address) {
-        log.info("Trying to register subscriber '{}' ...", EthUtil.shortenAddress(address));
+    public void createSubscriberIfNotExists(String subAccAddr) {
+        log.info("Trying to register subscriber '{}' ...", EthUtil.shortenAddress(subAccAddr));
 
-        if (subscriberRepo.existsById(address)) {
-            log.info("Subscriber '{}' is already registered.", EthUtil.shortenAddress(address));
+        if (subscriberRepo.existsById(subAccAddr)) {
+            log.info("Subscriber '{}' is already registered.", EthUtil.shortenAddress(subAccAddr));
             return;
         }
 
-        String contractAddress = ethService.getSubscriberContractAddress(address);
-        if (contractAddress == null) {
-            log.error("A contract for subscriber '{}' was not found!", EthUtil.shortenAddress(address));
+        String subContrAddr = ethService.getSubscriberContractAddress(subAccAddr);
+        if (subContrAddr == null) {
+            log.error("A contract for subscriber '{}' was not found!", EthUtil.shortenAddress(subAccAddr));
             throw new NotFoundException("Subscriber was not found!");
         }
 
-        List<FeedSubscriber.Subscription> feedSubscriptions = ethService.getSubscriberSubscriptions(
-                contractAddress);
-
-        List<Subscription> subscriptions = new ArrayList<>();
-        for (FeedSubscriber.Subscription feedSubscription : feedSubscriptions) {
-            Publisher publisher = publisherService.createPublisher(feedSubscription.pubAddress);
-            Subscription subscription = new Subscription();
-            subscription.setSubContractAddress(contractAddress);
-            subscription.setPubContractAddress(publisher.getContractAddress());
-            subscriptions.add(subscription);
-        }
-
-        Subscriber subscriber = new Subscriber();
-        subscriber.setAccountAddress(address.toLowerCase());
-        subscriber.setContractAddress(contractAddress);
-        subscriber.setSubscriptions(subscriptions);
-        subscriber.setBlockNumber(Numeric.toHexStringWithPrefix((ethService.getCurrentBlockNumber())));
-
-        subscriberRepo.save(subscriber);
+        // Save to db
+        Subscriber sub = saveSubscriber(subAccAddr, subContrAddr);
+        // Register event listener
+        ethSubEventListener.registerSubEventListener(sub);
 
         log.info("Subscriber '{}' with contract '{}' has been registered.",
-                EthUtil.shortenAddress(address), EthUtil.shortenAddress(contractAddress));
-
-        ethEventListener.registerSubscriberEventListener(subscriber);
+                EthUtil.shortenAddress(subAccAddr), EthUtil.shortenAddress(subContrAddr));
     }
 
-    public void removeSubscriber(String address) {
-        log.info("Trying to unregister subscriber '{}' ...", EthUtil.shortenAddress(address));
+    public void removeSubscriber(String subAccAddr) {
+        log.info("Trying to unregister subscriber '{}' ...", EthUtil.shortenAddress(subAccAddr));
 
-        Subscriber subscriber = subscriberRepo.getById(address);
-        if (subscriber == null) {
-            log.info("Subscriber '{}' was not found.", EthUtil.shortenAddress(address));
+        Optional<Subscriber> sub = subscriberRepo.findById(subAccAddr);
+        if (sub.isEmpty()) {
+            log.info("Subscriber '{}' was not found.", EthUtil.shortenAddress(subAccAddr));
             return;
         }
 
-        ethEventListener.unregisterSubscriberEventListener(subscriber);
+        ethSubEventListener.unregisterSubEventListener(sub.get());
 
-        subscriberRepo.deleteById(address);
+        subscriberRepo.deleteById(subAccAddr);
 
-        log.info("Subscriber '{}' has been unregistered.", EthUtil.shortenAddress(address));
+        log.info("Subscriber '{}' has been unregistered.", EthUtil.shortenAddress(subAccAddr));
     }
 
-    public void addSubscription(String address, String pubAddress) {
+    public void addSubscription(String subAccAddr, String pubContrAddr) {
         // Get subscriber
-        Subscriber subscriber = subscriberRepo.getById(address);
-        if (subscriber == null) {
+        Optional<Subscriber> sub = subscriberRepo.findById(subAccAddr);
+        if (sub.isEmpty()) {
             return;
         }
+        Subscriber subscriber = sub.get();
 
         log.info("Adding subscription '{}/{}' of subscriber '{}' ...",
                 EthUtil.shortenAddress(subscriber.getContractAddress()),
-                EthUtil.shortenAddress(pubAddress), EthUtil.shortenAddress(address));
-
-        // Create publisher if publisher does not exists
-        publisherService.createPublisher(pubAddress);
+                EthUtil.shortenAddress(pubContrAddr), EthUtil.shortenAddress(subAccAddr));
 
         // Abort if subscriber already has subscription
         boolean existsSubscription = subscriber.getSubscriptions()
                 .stream()
-                .anyMatch(o -> o.getPubContractAddress().equalsIgnoreCase(pubAddress));
+                .anyMatch(o -> o.getPubContractAddress().equalsIgnoreCase(pubContrAddr));
         if (existsSubscription) {
             return;
         }
 
-        // Update subscriber
-        Subscription subscriptions = new Subscription();
-        subscriptions.setSubContractAddress(subscriber.getContractAddress());
-        subscriptions.setPubContractAddress(pubAddress);
-        subscriber.getSubscriptions().add(subscriptions);
+        // Create publisher if publisher does not exist
+        publisherService.createPublisherIfNotExists(pubContrAddr);
 
-        // Update block number
-        subscriber.setBlockNumber(Numeric.toHexStringWithPrefix(ethService.getCurrentBlockNumber()));
-        subscriberRepo.save(subscriber);
+        // Create new subscription and update subscriber
+        Subscription subscription = createSubscription(subscriber.getContractAddress(), pubContrAddr);
+        updateSubscriber(subscriber, subscription);
     }
 
-    public void removeSubscription(String address, String pubAddress) {
+    public void removeSubscription(String subAccAddr, String pubContrAddr) {
         // Get subscriber
-        Subscriber subscriber = subscriberRepo.getById(address);
-        if (subscriber == null) {
+        Optional<Subscriber> sub = subscriberRepo.findById(subAccAddr);
+        if (sub.isEmpty()) {
             return;
         }
+        Subscriber subscriber = sub.get();
 
         log.info("Removing subscription '{}/{}' of subscriber '{}' ...",
                 EthUtil.shortenAddress(subscriber.getContractAddress()),
-                EthUtil.shortenAddress(pubAddress), EthUtil.shortenAddress(address));
+                EthUtil.shortenAddress(pubContrAddr), EthUtil.shortenAddress(subAccAddr));
 
-        subscriber.getSubscriptions().removeIf(s -> s.getPubContractAddress().equalsIgnoreCase(pubAddress));
+        subscriber.getSubscriptions().removeIf(s ->
+                s.getPubContractAddress().equalsIgnoreCase(pubContrAddr));
         if (subscriber.getSubscriptions().isEmpty()) {
             subscriber.setSubscriptions(null);
-            subscriptionRepo.deleteById(subscriber.getContractAddress(), pubAddress);
+            subscriptionRepo.deleteById(subscriber.getContractAddress(), pubContrAddr);
         }
         subscriberRepo.save(subscriber);
 
         // Check if no more subscriptions exist for publisher
-        if (!subscriptionsExist(pubAddress)) {
-            publisherService.removePublisher(pubAddress);
+        if (!subscriptionsExist(pubContrAddr)) {
+            publisherService.removePublisher(pubContrAddr);
         }
     }
 
-    public List<Entry> getEntriesBySubscriberAccountAddress(String address) {
-        Subscriber subscriber = subscriberRepo.getById(address);
-        if (subscriber == null) {
+    public List<Entry> getEntriesBySubscriberAccountAddress(String subAccAddr) {
+        Optional<Subscriber> sub = subscriberRepo.findById(subAccAddr);
+        if (sub.isEmpty()) {
             throw new NotFoundException("Subscriber was not found!");
         }
-        return entryRepo.findAllBySubscriberContractAddress(subscriber.getContractAddress());
+        return entryRepo.findAllBySubscriberContractAddress(sub.get().getContractAddress());
     }
 
-    private boolean subscriptionsExist(String pubAddress) {
+    private Subscriber updateSubscriber(Subscriber subscriber, Subscription subscription) {
+        subscriber.getSubscriptions().add(subscription);
+
+        // Update block number
+        subscriber.setBlockNumber(Numeric.toHexStringWithPrefix(ethService.getCurrentBlockNumber()));
+        return subscriberRepo.save(subscriber);
+    }
+
+    private Subscriber saveSubscriber(String subAccAddr, String subContrAddr) {
+        Subscriber subscriber = new Subscriber();
+        subscriber.setAccountAddress(subAccAddr.toLowerCase());
+        subscriber.setContractAddress(subContrAddr);
+        subscriber.setSubscriptions(getSubscriptions(subContrAddr));
+        subscriber.setBlockNumber(Numeric.toHexStringWithPrefix((ethService.getCurrentBlockNumber())));
+        return subscriberRepo.save(subscriber);
+    }
+
+    private List<Subscription> getSubscriptions(String subContrAddr) {
+        List<FeedSubscriber.Subscription> feedSubscriptions = ethService.getSubscriberSubscriptions(
+                subContrAddr);
+        List<Subscription> subscriptions = new ArrayList<>();
+        for (FeedSubscriber.Subscription feedSubscription : feedSubscriptions) {
+            // Create publisher if publisher does not exist
+            Publisher pub = publisherService.createPublisherIfNotExists(feedSubscription.pubAddress);
+            subscriptions.add(createSubscription(subContrAddr, pub.getContractAddress()));
+        }
+        return subscriptions;
+    }
+
+    private Subscription createSubscription(String subContrAddr, String pubContrAddr) {
+        Subscription subscription = new Subscription();
+        subscription.setSubContractAddress(subContrAddr);
+        subscription.setPubContractAddress(pubContrAddr);
+        return subscription;
+    }
+
+    private boolean subscriptionsExist(String pubContrAddr) {
         return subscriberRepo.findAll()
                 .stream()
                 .anyMatch(o -> o.getSubscriptions()
                         .stream()
-                        .anyMatch(s -> s.getPubContractAddress().equalsIgnoreCase(pubAddress)));
+                        .anyMatch(s -> s.getPubContractAddress().equalsIgnoreCase(pubContrAddr)));
     }
 
 }

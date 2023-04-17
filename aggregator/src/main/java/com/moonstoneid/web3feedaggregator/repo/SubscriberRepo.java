@@ -8,7 +8,4 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SubscriberRepo extends JpaRepository<Subscriber, String> {
 
-    @Query("SELECT s FROM Subscriber s WHERE s.accountAddress = :id")
-    Subscriber getById(String id);
-
 }

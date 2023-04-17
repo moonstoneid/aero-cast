@@ -8,7 +8,4 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PublisherRepo extends JpaRepository<Publisher, String> {
 
-    @Query("SELECT p FROM Publisher p WHERE p.contractAddress = :id")
-    Publisher getById(String id);
-
 }

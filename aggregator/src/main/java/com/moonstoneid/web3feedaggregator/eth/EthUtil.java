@@ -10,15 +10,16 @@ import org.web3j.protocol.core.methods.request.EthFilter;
 
 public class EthUtil {
 
-    public static EthFilter createFilter(String addr, BigInteger blockNumber, Event event) {
+    public static EthFilter createFilter(String contrAddr, BigInteger blockNumber, Event event) {
         EthFilter filter = new EthFilter(DefaultBlockParameter.valueOf(blockNumber),
-                DefaultBlockParameterName.LATEST, addr);
+                DefaultBlockParameterName.LATEST, contrAddr);
         filter.addSingleTopic(EventEncoder.encode(event));
         return filter;
     }
 
     // Create a method to shorten ethereum addresses to the first 6 and last 2 characters
-    public static String shortenAddress(String address) {
-        return address.substring(0, 6) + "..." + address.substring(address.length() - 2);
+    public static String shortenAddress(String addr) {
+        return addr.substring(0, 6) + "..." + addr.substring(addr.length() - 2);
     }
+
 }

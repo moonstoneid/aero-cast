@@ -32,19 +32,19 @@ public class EthService {
         return web3j;
     }
 
-    public String getSubscriberContractAddress(String accountAddress) {
+    public String getSubscriberContractAddress(String subAccAddr) {
         FeedRegistry contract = FeedRegistry.load(appProperties.getEth().getRegContractAddress(),
                 web3j, getCredentials(), contractGasProvider);
         try {
-            return contract.getSubscriberContractByAddress(accountAddress).sendAsync().get();
+            return contract.getSubscriberContractByAddress(subAccAddr).sendAsync().get();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public List<FeedSubscriber.Subscription> getSubscriberSubscriptions(String contractAddress) {
+    public List<FeedSubscriber.Subscription> getSubscriberSubscriptions(String subContrAddr) {
         // Use FeedSubscriber contract to get subscriptions
-        FeedSubscriber contract = FeedSubscriber.load(contractAddress, web3j, getCredentials(),
+        FeedSubscriber contract = FeedSubscriber.load(subContrAddr, web3j, getCredentials(),
                 contractGasProvider);
         try {
             return contract.getSubscriptions().sendAsync().get();
@@ -53,9 +53,9 @@ public class EthService {
         }
     }
 
-    public String getPublisherFeedUrl(String contractAddress) {
+    public String getPublisherFeedUrl(String pubContrAddr) {
         // Use FeedPublisher contract to get feed url
-        FeedPublisher contract = FeedPublisher.load(contractAddress, web3j, getCredentials(),
+        FeedPublisher contract = FeedPublisher.load(pubContrAddr, web3j, getCredentials(),
                 contractGasProvider);
         try {
             return contract.getFeedUrl().sendAsync().get();
@@ -64,11 +64,11 @@ public class EthService {
         }
     }
 
-    public List<FeedPublisher.PubItem> getPublisherItems(String contractAddress) {
+    public List<FeedPublisher.PubItem> getPublisherItems(String pubContrAddr) {
         List<FeedPublisher.PubItem> items = new ArrayList<>();
 
         // Use FeedPublisher contract to get PubItems
-        FeedPublisher contract = FeedPublisher.load(contractAddress, web3j, getCredentials(),
+        FeedPublisher contract = FeedPublisher.load(pubContrAddr, web3j, getCredentials(),
                 contractGasProvider);
         try {
             BigInteger count = contract.getTotalPubItemCount().sendAsync().get();
@@ -86,9 +86,9 @@ public class EthService {
         return items;
     }
 
-    public FeedPublisher.PubItem getPubItem(String contractAddress, BigInteger index) {
+    public FeedPublisher.PubItem getPubItem(String pubContrAddr, BigInteger index) {
         // Use FeedPublisher contract to get PubItems
-        FeedPublisher contract = FeedPublisher.load(contractAddress, web3j, getCredentials(),
+        FeedPublisher contract = FeedPublisher.load(pubContrAddr, web3j, getCredentials(),
                 contractGasProvider);
         try {
            return contract.getPubItem(index).sendAsync().get();
