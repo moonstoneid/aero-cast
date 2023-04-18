@@ -12,13 +12,13 @@ import com.moonstoneid.web3feedaggregator.eth.contracts.FeedPublisher;
 import com.moonstoneid.web3feedaggregator.model.Entry;
 import com.moonstoneid.web3feedaggregator.model.Publisher;
 import com.moonstoneid.web3feedaggregator.repo.EntryRepo;
-import com.moonstoneid.web3feedaggregator.repo.PublisherRepo;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,14 +26,12 @@ import org.springframework.stereotype.Service;
 public class EntryService {
 
     private final EntryRepo entryRepo;
-    // TODO: Would be better to have a PublisherService but this leads to a cyclic dependency
-    private final PublisherRepo publisherRepo;
-
+    private final PublisherService publisherService;
     private final EthService ethService;
 
-    public EntryService(EntryRepo entryRepo, PublisherRepo publisherRepo, EthService ethService) {
+    public EntryService(EntryRepo entryRepo, @Lazy PublisherService publisherService, EthService ethService) {
         this.entryRepo = entryRepo;
-        this.publisherRepo = publisherRepo;
+        this.publisherService = publisherService;
         this.ethService = ethService;
     }
 
@@ -48,7 +46,7 @@ public class EntryService {
     }
 
     public void createEntry(String pubContrAddr, String guid) {
-        Optional<Publisher> pub = publisherRepo.findById(pubContrAddr);
+        Optional<Publisher> pub = publisherService.findPublisher(pubContrAddr);
         if (pub.isEmpty()) {
             return;
         }
