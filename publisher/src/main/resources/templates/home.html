@@ -32,7 +32,7 @@
             <th>Link</th>
         </tr>
         <tr th:each="entry: ${entries}">
-            <td th:text="${entry.pubDate}"/>
+            <td th:text="${entry.date}"/>
             <td th:text="${entry.title}"/>
             <td th:text="${entry.description}"/>
             <td><a th:text="'/feed/entry/'+${entry.id}" th:href="'/feed/entry/'+${entry.id}"/></td>

@@ -12,6 +12,6 @@ public class EntryVM {
     private Integer id;
     private String title;
     private String description;
-    private OffsetDateTime pubDate;
+    private OffsetDateTime date;
 
 }

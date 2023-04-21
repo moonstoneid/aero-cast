@@ -23,7 +23,7 @@ public final class ModelMapper {
         entryVM.setId(entry.getId());
         entryVM.setTitle(entry.getTitle());
         entryVM.setDescription(entry.getDescription());
-        entryVM.setPubDate(entry.getPubDate());
+        entryVM.setDate(entry.getDate());
         return entryVM;
     }
 
@@ -31,7 +31,7 @@ public final class ModelMapper {
         Entry entry = new Entry();
         entry.setTitle(entryVM.getTitle());
         entry.setDescription(entryVM.getDescription());
-        entry.setPubDate(entryVM.getPubDate());
+        entry.setDate(entryVM.getDate());
         return entry;
     }
 

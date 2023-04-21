@@ -28,7 +28,7 @@ public class EntryController extends BaseController {
         String url = getBaseUrl(request);
 
         Entry entry = ModelMapper.toModel(entryVM);
-        entry.setPubDate(OffsetDateTime.now());
+        entry.setDate(OffsetDateTime.now());
 
         entryService.saveEntry(url, entry);
 

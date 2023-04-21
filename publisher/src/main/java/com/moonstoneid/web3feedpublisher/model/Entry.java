@@ -1,5 +1,7 @@
 package com.moonstoneid.web3feedpublisher.model;
 
+import java.time.OffsetDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,24 +10,23 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
 
-import java.time.OffsetDateTime;
-
 @Data
 @Entity
 @Table(name = "entry")
 public class Entry {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(length = 128, nullable = false)
+    @Column(name = "title", length = 200, nullable = false)
     private String title;
 
-    @Column(length = 2000, nullable = false)
+    @Column(name = "description", length = 2000, nullable = false)
     private String description;
 
-    @Column(nullable = false)
-    private OffsetDateTime pubDate;
+    @Column(name = "date", nullable = false)
+    private OffsetDateTime date;
 
 }

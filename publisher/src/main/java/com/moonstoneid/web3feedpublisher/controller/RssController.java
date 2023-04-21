@@ -57,7 +57,7 @@ public class RssController extends BaseController {
             description.setType("text/plain");
             description.setValue(entry.getDescription());
             rssEntry.setDescription(description);
-            rssEntry.setPublishedDate(new Date(entry.getPubDate().toInstant().toEpochMilli()));
+            rssEntry.setPublishedDate(new Date(entry.getDate().toInstant().toEpochMilli()));
             rssEntries.add(rssEntry);
         }
         return rssEntries;
