@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.12;
 
-import "hardhat/console.sol";
+import "@ganache/console.log/console.sol";
 
 import "./Ownable.sol";
 

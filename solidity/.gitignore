@@ -5,5 +5,11 @@
 /cache
 /artifacts
 
+# Truffle
+/build
+
+# Ganache
+/ganache_data
+
 # Env file
 .env

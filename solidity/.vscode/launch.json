@@ -5,14 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
+            "type": "truffle",
             "request": "launch",
-            "name": "Launch Hardhat Script",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "cwd": "${workspaceFolder}",
-            "program": "scripts/${fileBasename}"
+            "name": "Truffle - Debug Transaction",
+            "stopOnEntry": false,
+            "txHash": "0x",
+            "files": [],
+            "workingDirectory": "${workspaceFolder}",
+            "providerUrl": "http://127.0.0.1:8545",
+            "disableFetchExternal": false
         }
     ]
 }
