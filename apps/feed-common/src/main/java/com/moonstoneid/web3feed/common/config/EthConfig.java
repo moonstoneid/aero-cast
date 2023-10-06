@@ -1,15 +1,27 @@
 package com.moonstoneid.web3feed.common.config;
 
 import com.moonstoneid.web3feed.common.util.LogInterceptor;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 
-public final class Web3jBuilder {
+@Configuration
+@EnableConfigurationProperties({EthApiProperties.class})
+@Slf4j
+public class EthConfig {
 
-    private Web3jBuilder() {}
+    @Bean
+    public Web3j web3j(EthApiProperties ethApiProperties) {
+        String ethApiUrl = ethApiProperties.getUrl();
+        log.debug("Using Ethereum API URL {}.", ethApiUrl);
+        return buildWeb3j(ethApiUrl, log.isDebugEnabled());
+    }
 
-    public static Web3j build(String ethApiUrl, boolean enableRequestLogging) {
+    public static Web3j buildWeb3j(String ethApiUrl, boolean enableRequestLogging) {
         if (ethApiUrl == null || ethApiUrl.isEmpty()) {
             throw new Error("Ethereum API URL cannot be empty!");
         }
