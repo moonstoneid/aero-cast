@@ -2,5 +2,5 @@
 target/
 
 # H2 Database file
-/aggdb.mv.db
-/pubdb.mv.db
+aggdb.mv.db
+pubdb.mv.db
