@@ -1,6 +1,6 @@
 # IntelliJ project files
 /.idea
+*.iml
 
-# H2 Database file
-/aggdb.mv.db
-/pubdb.mv.db
+# VS Code project files
+/.vscode

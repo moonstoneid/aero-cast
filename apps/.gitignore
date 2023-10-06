@@ -1,0 +1,6 @@
+# Build files
+target/
+
+# H2 Database file
+/aggdb.mv.db
+/pubdb.mv.db
