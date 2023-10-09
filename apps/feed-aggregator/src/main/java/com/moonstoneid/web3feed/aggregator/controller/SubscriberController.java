@@ -7,6 +7,7 @@ import com.moonstoneid.web3feed.aggregator.controller.model.EntryVM;
 import com.moonstoneid.web3feed.aggregator.controller.model.SubscriberVM;
 import com.moonstoneid.web3feed.aggregator.model.Entry;
 import com.moonstoneid.web3feed.aggregator.model.Subscriber;
+import com.moonstoneid.web3feed.aggregator.service.EntryService;
 import com.moonstoneid.web3feed.aggregator.service.SubscriberService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,21 +24,23 @@ import org.springframework.web.bind.annotation.RestController;
 public class SubscriberController {
 
     private final SubscriberService subscriberService;
+    private final EntryService entryService;
 
-    public SubscriberController(SubscriberService subscriberService) {
+    public SubscriberController(SubscriberService subscriberService, EntryService entryService) {
         this.subscriberService = subscriberService;
+        this.entryService = entryService;
     }
 
     @GetMapping(value = "/{address}", produces = { "application/json" })
     public @ResponseBody SubscriberVM getSubscriber(@PathVariable("address") String address) {
-        Subscriber subscriber = subscriberService.findSubscriberByAccountAddress(address);
+        Subscriber subscriber = subscriberService.getSubscriber(address);
         return toViewModel(subscriber);
     }
 
     @PostMapping(value = "/{address}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void registerSubscriber(@PathVariable("address") String address) {
-        subscriberService.createSubscriberIfNotExists(address);
+        subscriberService.createSubscriber(address);
     }
 
     @DeleteMapping(value = "/{address}")
@@ -48,7 +51,9 @@ public class SubscriberController {
 
     @GetMapping(value = "/{address}/entries", produces = { "application/json" })
     public @ResponseBody List<EntryVM> getEntries(@PathVariable("address") String address) {
-        List<Entry> entries = subscriberService.getEntriesBySubscriberAccountAddress(address);
+        Subscriber subscriber = subscriberService.getSubscriber(address);
+        List<Entry> entries = entryService.getEntriesBySubscriberContractAddress(
+                subscriber.getContractAddress());
         return toViewModel(entries);
     }
 

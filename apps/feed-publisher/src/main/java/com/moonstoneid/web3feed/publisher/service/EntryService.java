@@ -2,7 +2,7 @@ package com.moonstoneid.web3feed.publisher.service;
 
 import java.util.List;
 
-import com.moonstoneid.web3feed.publisher.eth.EthPublisherService;
+import com.moonstoneid.web3feed.publisher.eth.EthPublisherAdapter;
 import com.moonstoneid.web3feed.publisher.repo.EntryRepo;
 import com.moonstoneid.web3feed.publisher.model.Entry;
 import org.springframework.stereotype.Service;
@@ -12,11 +12,11 @@ import org.springframework.util.Assert;
 public class EntryService {
 
     private final EntryRepo entryRepo;
-    private final EthPublisherService ethPublisherService;
+    private final EthPublisherAdapter ethPublisherAdapter;
 
-    public EntryService(EntryRepo entryRepo, EthPublisherService ethPublisherService) {
+    public EntryService(EntryRepo entryRepo, EthPublisherAdapter ethPublisherAdapter) {
         this.entryRepo = entryRepo;
-        this.ethPublisherService = ethPublisherService;
+        this.ethPublisherAdapter = ethPublisherAdapter;
     }
 
     public List<Entry> getAllEntries() {
@@ -33,8 +33,7 @@ public class EntryService {
 
         Entry savedEntry = entryRepo.save(entry);
 
-        // Publish to web3
-        ethPublisherService.publish(url + "/feed/entry/" + savedEntry.getId());
+        ethPublisherAdapter.publish(url + "/feed/entry/" + savedEntry.getId());
     }
 
 }

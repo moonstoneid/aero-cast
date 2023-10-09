@@ -1,13 +1,11 @@
 package com.moonstoneid.web3feed.aggregator.repo;
 
 import java.util.List;
-import java.util.Optional;
 
 import com.moonstoneid.web3feed.aggregator.model.Entry;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,28 +13,29 @@ import org.springframework.transaction.annotation.Transactional;
 public interface EntryRepo extends JpaRepository<Entry, Entry.EntryId> {
 
     @Query("SELECT e " +
-           "FROM Entry e " +
-           "WHERE e.pubContractAddress IN (" +
-           "SELECT s.pubContractAddress " +
-           "FROM Subscription s " +
-           "WHERE s.subContractAddress = :address)")
-    List<Entry> findAllBySubscriberContractAddress(@Param("address") String address);
-
-    @Query("SELECT case when count(e)> 0 then true else false end " +
             "FROM Entry e " +
-            "WHERE e.pubContractAddress = :address " +
+            "WHERE e.pubContractAddress IN (" +
+            "SELECT s.pubContractAddress " +
+            "FROM Subscription s " +
+            "WHERE s.subContractAddress = :subContractAddr)")
+    List<Entry> findAllBySubscriberContractAddress(String subContractAddr);
+
+    @Query("SELECT CASE WHEN COUNT(e) > 0 THEN TRUE ELSE FALSE END " +
+            "FROM Entry e " +
+            "WHERE e.pubContractAddress = :pubContractAddr " +
             "AND e.url = :url")
-    boolean existsByPubAddrAndEntryURL(@Param("address") String address, @Param("url") String url);
+    boolean existsByPublisherContractAddressAndUrl(String pubContractAddr, String url);
 
-    @Query("SELECT MAX(e.number) " +
+    @Query("SELECT COALESCE(MAX(e.number), 0) " +
             "FROM Entry e " +
-            "WHERE e.pubContractAddress = :address")
-    Optional<Integer> findMaxNumberByPublisherContractAddress(@Param("address") String address);
+            "WHERE e.pubContractAddress = :pubContractAddr")
+    int getMaxNumberByPublisherContractAddress(String pubContractAddr);
 
     @Modifying
     @Transactional
     @Query("DELETE " +
             "FROM Entry e " +
-            "WHERE e.pubContractAddress = :pubAddress")
-    void deleteAllByPubContractAddress(String pubAddress);
+            "WHERE e.pubContractAddress = :pubContractAddr")
+    void deleteAllByPublisherContractAddress(String pubContractAddr);
+
 }
