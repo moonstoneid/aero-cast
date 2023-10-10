@@ -15,7 +15,6 @@ const unsubscribeButtonHandler = async function () {
 
 const subscribeButton = document.getElementById('subscribe-button');
 const unsubscribeButton = document.getElementById('unsubscribe-button');
-const isSubscribedParagraph = document.getElementById('issubscribed-paragraph');
 subscribeButton && subscribeButton.addEventListener('click', subscribeButtonHandler, false);
 unsubscribeButton && unsubscribeButton.addEventListener('click', unsubscribeButtonHandler, false);
 
@@ -147,11 +146,9 @@ function getSigner() {
 function setIsSubscribed() {
     subscribeButton.style.display = 'none';
     unsubscribeButton.style.display = null;
-    isSubscribedParagraph.innerText = '\u2705 You are subscribed to this publisher!';
 }
 
 function setIsUnSubscribed() {
     subscribeButton.style.display = null;
     unsubscribeButton.style.display = 'none';
-    isSubscribedParagraph.innerText = '\u274C You are not subscribed to this publisher!';
 }

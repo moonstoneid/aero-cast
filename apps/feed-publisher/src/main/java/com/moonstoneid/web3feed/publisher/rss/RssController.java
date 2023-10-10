@@ -70,7 +70,7 @@ public class RssController {
     }
 
     private String createEntryLink(Integer id) {
-        return baseUrl + "/feed/entry/" + id;
+        return baseUrl + "/entry/" + id;
     }
 
 }

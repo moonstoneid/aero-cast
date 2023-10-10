@@ -16,6 +16,10 @@ const appTmpl = `
 </div>
 
 <div v-if="account !== null && hasRegistered">
+  <button v-on:click="$event => handleUnregister()">Unregister</button>
+</div>
+
+<div v-if="account !== null && hasRegistered">
   <p>Here is your latest feed.</p>
   <table border="1">
     <tr>
@@ -31,10 +35,6 @@ const appTmpl = `
       <td><a v-bind:href="entry.url" />{{ entry.url }}</td>
     </tr>
   </table>
-</div>
-
-<div v-if="account !== null && hasRegistered">
-  <button v-on:click="$event => handleUnregister()">Unregister</button>
 </div>
 `;
 

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div>
+    <h1>Demo publisher</h1>
+
+    <h2>Create entry</h2>
+
+    <form action="#" th:action="@{/entry}" th:object="${entry}" method="post">
+        <p>Title: <input type="text" th:field="*{title}"/></p>
+        <p>Description: <input type="text" th:field="*{description}"/></p>
+        <p><input type="submit" value="Submit"/></p>
+    </form>
+</div>
+</body>
+</html>

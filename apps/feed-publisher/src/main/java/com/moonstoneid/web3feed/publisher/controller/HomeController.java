@@ -27,12 +27,11 @@ public class HomeController {
     }
 
     @GetMapping("/")
-    public String getIndex(Model model) {
+    public String home(Model model) {
         List<Entry> entries = entryService.getAllEntries();
         model.addAttribute("regContractAddr", regContractAddr);
         model.addAttribute("pubContractAddr", pubContractAddr);
         model.addAttribute("entries", ModelMapper.toViewModel(entries));
-        model.addAttribute("entry", new EntryVM());
         return "home";
     }
 

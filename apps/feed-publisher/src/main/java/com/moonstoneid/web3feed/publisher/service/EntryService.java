@@ -37,7 +37,7 @@ public class EntryService {
 
         Entry savedEntry = entryRepo.save(entry);
 
-        ethPublisherAdapter.publish(baseUrl + "/feed/entry/" + savedEntry.getId());
+        ethPublisherAdapter.publish(baseUrl + "/entry/" + savedEntry.getId());
     }
 
 }
