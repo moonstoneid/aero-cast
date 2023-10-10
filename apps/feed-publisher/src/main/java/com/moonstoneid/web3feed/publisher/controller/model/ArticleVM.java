@@ -7,11 +7,12 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class EntryVM {
+public class ArticleVM {
 
     private Integer id;
     private String title;
-    private String description;
+    private String summary;
+    private String content;
     private OffsetDateTime date;
 
 }

@@ -5,8 +5,8 @@ import java.util.Date;
 import java.util.List;
 
 import com.moonstoneid.web3feed.publisher.config.AppProperties;
-import com.moonstoneid.web3feed.publisher.model.Entry;
-import com.moonstoneid.web3feed.publisher.service.EntryService;
+import com.moonstoneid.web3feed.publisher.model.Article;
+import com.moonstoneid.web3feed.publisher.service.ArticleService;
 import com.rometools.rome.feed.synd.SyndContentImpl;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndEntryImpl;
@@ -24,53 +24,53 @@ public class RssController {
 
     private final String baseUrl;
 
-    private final EntryService entryService;
+    private final ArticleService articleService;
 
-    public RssController(AppProperties appProperties, EntryService entryService) {
+    public RssController(AppProperties appProperties, ArticleService articleService) {
         this.baseUrl = appProperties.getBaseUrl();
-        this.entryService = entryService;
+        this.articleService = articleService;
     }
 
     @RequestMapping(value = "/rss", method = RequestMethod.GET,
             produces = MediaType.APPLICATION_XML_VALUE)
     public String getRssFeed() throws FeedException {
-        List<Entry> entries = entryService.getAllEntries();
-        SyndFeed feed = createRssFeed(entries);
+        List<Article> articles = articleService.getAllArticles();
+        SyndFeed feed = createRssFeed(articles);
         return new SyndFeedOutput().outputString(feed);
     }
 
-    private SyndFeed createRssFeed(List<Entry> entries) {
+    private SyndFeed createRssFeed(List<Article> articles) {
         SyndFeed feed = new SyndFeedImpl();
         feed.setFeedType("rss_2.0");
         feed.setTitle("A sample web3 publisher");
         feed.setDescription("A sample web3 feed");
         feed.setLink(baseUrl);
-        feed.setEntries(createRssEntries(entries));
+        feed.setEntries(createRssEntries(articles));
         return feed;
     }
 
-    private List<SyndEntry> createRssEntries(List<Entry> entries) {
-        List<SyndEntry> rssEntries = new ArrayList<>();
-        for (Entry entry : entries) {
-            rssEntries.add(createRssEntry(entry));
+    private List<SyndEntry> createRssEntries(List<Article> articles) {
+        List<SyndEntry> entries = new ArrayList<>();
+        for (Article article : articles) {
+            entries.add(createRssEntry(article));
         }
-        return rssEntries;
+        return entries;
     }
 
-    private SyndEntry createRssEntry(Entry entry) {
-        SyndEntry rssEntry = new SyndEntryImpl();
-        rssEntry.setTitle(entry.getTitle());
-        rssEntry.setLink(createEntryLink(entry.getId()));
+    private SyndEntry createRssEntry(Article article) {
+        SyndEntry entry = new SyndEntryImpl();
+        entry.setTitle(article.getTitle());
+        entry.setLink(createRssEntryLink(article.getId()));
         SyndContentImpl description = new SyndContentImpl();
         description.setType("text/plain");
-        description.setValue(entry.getDescription());
-        rssEntry.setDescription(description);
-        rssEntry.setPublishedDate(new Date(entry.getDate().toInstant().toEpochMilli()));
-        return rssEntry;
+        description.setValue(article.getSummary());
+        entry.setDescription(description);
+        entry.setPublishedDate(new Date(article.getDate().toInstant().toEpochMilli()));
+        return entry;
     }
 
-    private String createEntryLink(Integer id) {
-        return baseUrl + "/entry/" + id;
+    private String createRssEntryLink(Integer id) {
+        return baseUrl + "/article/" + id;
     }
 
 }

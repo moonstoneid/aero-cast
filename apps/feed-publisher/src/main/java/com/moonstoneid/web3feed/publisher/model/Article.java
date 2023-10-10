@@ -12,8 +12,8 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "entry")
-public class Entry {
+@Table(name = "article")
+public class Article {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -23,8 +23,11 @@ public class Entry {
     @Column(name = "title", length = 200, nullable = false)
     private String title;
 
-    @Column(name = "description", length = 2000, nullable = false)
-    private String description;
+    @Column(name = "summary", length = 2000, nullable = false)
+    private String summary;
+
+    @Column(name = "content", length = 10000, nullable = false)
+    private String content;
 
     @Column(name = "date", nullable = false)
     private OffsetDateTime date;

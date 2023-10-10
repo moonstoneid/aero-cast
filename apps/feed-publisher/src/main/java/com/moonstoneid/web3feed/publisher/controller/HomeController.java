@@ -4,9 +4,8 @@ import java.util.List;
 
 import com.moonstoneid.web3feed.common.config.EthPublisherProperties;
 import com.moonstoneid.web3feed.common.config.EthRegistryProperties;
-import com.moonstoneid.web3feed.publisher.controller.model.EntryVM;
-import com.moonstoneid.web3feed.publisher.model.Entry;
-import com.moonstoneid.web3feed.publisher.service.EntryService;
+import com.moonstoneid.web3feed.publisher.model.Article;
+import com.moonstoneid.web3feed.publisher.service.ArticleService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,24 +13,24 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class HomeController {
 
-    private final EntryService entryService;
+    private final ArticleService articleService;
 
     private final String regContractAddr;
     private final String pubContractAddr;
 
-    public HomeController(EntryService entryService, EthRegistryProperties ethRegistryProperties,
+    public HomeController(ArticleService articleService, EthRegistryProperties ethRegistryProperties,
             EthPublisherProperties ethPublisherProperties) {
-        this.entryService = entryService;
+        this.articleService = articleService;
         this.regContractAddr = ethRegistryProperties.getContractAddress();
         this.pubContractAddr = ethPublisherProperties.getContractAddress();
     }
 
     @GetMapping("/")
     public String home(Model model) {
-        List<Entry> entries = entryService.getAllEntries();
+        List<Article> articles = articleService.getAllArticles();
         model.addAttribute("regContractAddr", regContractAddr);
         model.addAttribute("pubContractAddr", pubContractAddr);
-        model.addAttribute("entries", ModelMapper.toViewModel(entries));
+        model.addAttribute("articles", ModelMapper.toViewModel(articles));
         return "home";
     }
 

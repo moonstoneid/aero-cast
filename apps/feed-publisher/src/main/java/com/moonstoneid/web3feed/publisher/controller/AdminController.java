@@ -2,9 +2,9 @@ package com.moonstoneid.web3feed.publisher.controller;
 
 import java.time.OffsetDateTime;
 
-import com.moonstoneid.web3feed.publisher.controller.model.EntryVM;
-import com.moonstoneid.web3feed.publisher.model.Entry;
-import com.moonstoneid.web3feed.publisher.service.EntryService;
+import com.moonstoneid.web3feed.publisher.controller.model.CreateArticleVM;
+import com.moonstoneid.web3feed.publisher.model.Article;
+import com.moonstoneid.web3feed.publisher.service.ArticleService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,24 +16,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(path = "/admin")
 public class AdminController {
 
-    private final EntryService entryService;
+    private final ArticleService articleService;
 
-    public AdminController(EntryService entryService) {
-        this.entryService = entryService;
+    public AdminController(ArticleService articleService) {
+        this.articleService = articleService;
     }
 
     @GetMapping("")
     public String admin(Model model) {
-        model.addAttribute("entry", new EntryVM());
+        model.addAttribute("article", new CreateArticleVM());
         return "admin";
     }
 
-    @PostMapping("/entry")
-    public String createEntry(@ModelAttribute EntryVM entryVM) {
-        Entry entry = ModelMapper.toModel(entryVM);
-        entry.setDate(OffsetDateTime.now());
+    @PostMapping("/article")
+    public String createArticle(@ModelAttribute CreateArticleVM createArticleVM) {
+        Article article = ModelMapper.toModel(createArticleVM, OffsetDateTime.now());
 
-        entryService.saveEntry(entry);
+        articleService.createArticle(article);
 
         return "redirect:/admin";
     }

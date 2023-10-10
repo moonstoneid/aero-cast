@@ -10,20 +10,20 @@
     <button id="subscribe-button">Subscribe</button>
     <button id="unsubscribe-button">Unsubscribe</button>
 
-    <p>Here is the current feed.</p>
+    <p>Here are the current articles.</p>
 
     <table border="1">
         <tr>
             <th>Pub Date</th>
             <th>Title</th>
-            <th>Description</th>
+            <th>Summary</th>
             <th>Link</th>
         </tr>
-        <tr th:each="entry: ${entries}">
-            <td th:text="${entry.date}"/>
-            <td th:text="${entry.title}"/>
-            <td th:text="${entry.description}"/>
-            <td><a th:text="'/entry/'+${entry.id}" th:href="'/entry/'+${entry.id}"/></td>
+        <tr th:each="article: ${articles}">
+            <td th:text="${article.date}"/>
+            <td th:text="${article.title}"/>
+            <td th:text="${article.summary}"/>
+            <td><a th:text="'/article/'+${article.id}" th:href="'/article/'+${article.id}"/></td>
         </tr>
     </table>
 </div>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div>
+    <h1 th:text="${article.title}"/>
+    <p th:text="${article.date}"/>
+    <p th:text="${article.summary}"/>
+    <th:block th:each="cp : ${#strings.arraySplit(article.content, '&#10;')}">
+        <p th:if="${#strings.isEmpty(cp) == false}" th:text="${cp}"/>
+    </th:block>
+</div>
+</body>
+</html>

@@ -5,13 +5,14 @@
 </head>
 <body>
 <div>
-    <h1>Demo publisher</h1>
+    <h1>Demo Publisher</h1>
 
-    <h2>Create entry</h2>
+    <h2>Create article</h2>
 
-    <form action="#" th:action="@{/entry}" th:object="${entry}" method="post">
+    <form action="#" th:action="@{/admin/article}" th:object="${article}" method="post">
         <p>Title: <input type="text" th:field="*{title}"/></p>
-        <p>Description: <input type="text" th:field="*{description}"/></p>
+        <p>Summary: <input type="text" th:field="*{summary}"/></p>
+        <p>Content: <textarea th:field="*{content}"/></p>
         <p><input type="submit" value="Submit"/></p>
     </form>
 </div>
