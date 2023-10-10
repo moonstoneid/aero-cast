@@ -7,7 +7,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableConfigurationProperties({EthPublisherProperties.class, EthRegistryProperties.class})
+@EnableConfigurationProperties({AppProperties.class, EthPublisherProperties.class,
+        EthRegistryProperties.class})
 public class AppConfig extends BaseAppConfig {
 
 }
