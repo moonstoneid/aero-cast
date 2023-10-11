@@ -1,40 +1,40 @@
 import { createApp } from "/js/vue.js";
 
 const appTmpl = `
-<h1>Demo Aggregator</h1>
+<div class="mb-5">
+  <div class="mb-3">
+    <h1>Feed Aggregator</h1>
+  </div>
 
-<p v-if="error != null">{{ error }}</p>
-
-<div v-if="account === null">
-  <p>Connect your wallet.</p>
-  <button v-on:click="$event => handleConnectWallet()">Connect</button>
+  <p v-if="error != null">{{ error }}</p>
+  
+  <div v-if="account === null" class="mb-4">
+    <p>Connect your wallet.</p>
+    <button class="btn btn-primary" v-on:click="$event => handleConnectWallet()">Connect</button>
+  </div>
+  
+  <div v-if="account !== null && !hasRegistered" class="mb-4">
+    <p>You are currently not registered.</p>
+    <button class="btn btn-primary" v-on:click="$event => handleRegister()">Register</button>
+  </div>
+  
+  <div v-if="account !== null && hasRegistered" class="mb-4">
+    <button class="btn btn-light" v-on:click="$event => handleUnregister()">Unregister</button>
+  </div>
 </div>
 
-<div v-if="account !== null && !hasRegistered">
-  <p>You are currently not registered.</p>
-  <button v-on:click="$event => handleRegister()">Register</button>
-</div>
-
-<div v-if="account !== null && hasRegistered">
-  <button v-on:click="$event => handleUnregister()">Unregister</button>
-</div>
-
-<div v-if="account !== null && hasRegistered">
-  <p>Here is your latest feed.</p>
-  <table border="1">
-    <tr>
-      <th>Pub Date</th>
-      <th>Title</th>
-      <th>Description</th>
-      <th>Link</th>
-    </tr>
-    <tr v-for="entry in entries">
-      <td>{{ entry.date }}"</td>
-      <td>{{ entry.title }}</td>
-      <td>{{ entry.description }}</td>
-      <td><a v-bind:href="entry.url" />{{ entry.url }}</td>
-    </tr>
-  </table>
+<div v-if="account !== null && hasRegistered" class="mb-4">
+  <div v-if="!entries.length">
+    <p>There is currently nothing for you ...</p>
+  </div>
+  <div v-for="entry in entries" class="mb-4">
+    <h5><a v-on:click.prevent="$event => toggleEntryVisibility(entry)" href="#" target="_blank">{{ entry.title }}</a></h5>
+    <p class="small">{{ entry.date }}</p>
+    <div v-if="entry.visible">
+      <p>{{ entry.description }}</p>
+      <p><a v-bind:href="entry.url" target="_blank">Read more ...</a></p>
+    </div>
+  </div>
 </div>
 `;
 
@@ -87,7 +87,7 @@ const fetchHasRegistered = async function(account) {
         return false;
     }
     throw new Error("A unknown error occurred!");
-}
+};
 
 const register = async function(account) {
     const response = await fetch("/subscriber/" + account, {
@@ -101,7 +101,7 @@ const register = async function(account) {
     } else {
         throw new Error("A unknown error occurred!");
     }
-}
+};
 
 const unregister = async function(account) {
     const response = await fetch("/subscriber/" + account, {
@@ -111,19 +111,47 @@ const unregister = async function(account) {
         return;
     }
     throw new Error("A unknown error occurred!");
-}
+};
 
 const fetchEntries = async function(account) {
     const response = await fetch("/subscriber/" + account + "/entries");
     if (response.ok) {
-        return response.json();
+        return response
+            .json()
+            .then(entries => mapEntries(entries));
     }
     if (response.status === 404) {
         throw new Error("The subscriber account was not found!");
     } else {
         throw new Error("A unknown error occurred!");
     }
-}
+};
+
+const mapEntries = function(entries) {
+    const es = entries.map(e => (
+        {
+            title: e.title,
+            date: formatDate(Date.parse(e.date)),
+            description: e.description,
+            url: e.url,
+            visible: false,
+        }
+    ));
+    if (es.length > 0) {
+        es[0].visible = true;
+    }
+    return es;
+};
+
+const formatDate = function(date) {
+    const df = new Intl.DateTimeFormat('en-US', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+    });
+    return df.format(date);
+};
 
 createApp({
     template: appTmpl,
@@ -179,6 +207,11 @@ createApp({
             } catch (e) {
                 this.error = e;
             }
+        },
+        toggleEntryVisibility(entry) {
+            const visible = entry.visible;
+            this.entries.forEach(e => {e.visible = false;});
+            entry.visible = !visible;
         }
     }
 }).mount("#app");
