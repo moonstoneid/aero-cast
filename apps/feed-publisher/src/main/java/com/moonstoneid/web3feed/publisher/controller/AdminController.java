@@ -2,6 +2,7 @@ package com.moonstoneid.web3feed.publisher.controller;
 
 import java.time.OffsetDateTime;
 
+import com.moonstoneid.web3feed.publisher.config.AppProperties;
 import com.moonstoneid.web3feed.publisher.controller.model.CreateArticleVM;
 import com.moonstoneid.web3feed.publisher.model.Article;
 import com.moonstoneid.web3feed.publisher.service.ArticleService;
@@ -14,11 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller()
 @RequestMapping(path = "/admin")
-public class AdminController {
+public class AdminController extends BaseController {
 
     private final ArticleService articleService;
 
-    public AdminController(ArticleService articleService) {
+    public AdminController(AppProperties appProperties, ArticleService articleService) {
+        super(appProperties);
         this.articleService = articleService;
     }
 

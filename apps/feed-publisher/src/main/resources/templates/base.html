@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content, scriptArgs, script)">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title th:text="${appTitle}"></title>
+  <link rel="stylesheet" href="/css/bootstrap.css" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<div class="row g-0">
+  <div class="col-lg-3 col-md-2"></div>
+  <div class="col-lg-6 col-md-8 p-md-2 p-3 pt-md-3 pt-4">
+    <div th:replace="${content}"></div>
+  </div>
+  <div class="col-lg-3 col-md-2"></div>
+</div>
+<script type="text/javascript" src="/js/bootstrap.js"></script>
+<script type="text/javascript" src="/js/ethers.js"></script>
+<script th:replace="${scriptArgs}"></script>
+<script th:replace="${script}"></script>
+</body>
+</html>

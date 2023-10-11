@@ -1,20 +1,33 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-</head>
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:th="https://www.thymeleaf.org" th:replace="~{base :: layout(~{::div}, ~{}, ~{})}">>
+<head></head>
 <body>
 <div>
-    <h1>Demo Publisher</h1>
+  <div class="mb-4">
+    <h4 th:text="${appTitle}"/>
+    <h1>Create article</h1>
+  </div>
 
-    <h2>Create article</h2>
-
-    <form action="#" th:action="@{/admin/article}" th:object="${article}" method="post">
-        <p>Title: <input type="text" th:field="*{title}"/></p>
-        <p>Summary: <input type="text" th:field="*{summary}"/></p>
-        <p>Content: <textarea th:field="*{content}"/></p>
-        <p><input type="submit" value="Submit"/></p>
+  <div>
+    <form action="#" th:action="@{/admin/article}" th:object="${article}" method="post" >
+      <div class="mb-3">
+        <label for="titleInput" class="form-label">Title</label>
+        <input id="titleInput" class="form-control" type="text" th:field="*{title}"/>
+      </div>
+      <div class="mb-3">
+        <label for="summaryInput" class="form-label">Summary</label>
+        <input id="summaryInput" class="form-control" type="text" th:field="*{summary}"/>
+      </div>
+      <div class="mb-3">
+        <label for="contentTextarea" class="form-label">Content</label>
+        <textarea id="contentTextarea" class="form-control" rows="10" th:field="*{content}"></textarea>
+      </div>
+      <div class="mb-3">
+        <button class="btn btn-primary" type="submit">Create</button>
+      </div>
     </form>
+  </div>
 </div>
 </body>
 </html>

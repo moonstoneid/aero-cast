@@ -1,38 +1,34 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-</head>
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:th="https://www.thymeleaf.org" th:replace="~{base :: layout(~{::div}, ~{::script[0]}, ~{::script[1]})}">
+<head></head>
 <body>
 <div>
-    <h1>Demo Publisher</h1>
+  <div class="mb-3">
+    <button id="subscribe-button" class="btn btn-light">Subscribe</button>
+    <button id="unsubscribe-button" class="btn btn-light">Unsubscribe</button>
+  </div>
 
-    <button id="subscribe-button">Subscribe</button>
-    <button id="unsubscribe-button">Unsubscribe</button>
+  <div class="mb-5">
+    <h1 th:text="${appTitle}"/>
+    <p th:text="${appSubTitle}"/>
+  </div>
 
-    <p>Here are the current articles.</p>
+  <div th:if="${articles.isEmpty()}" class="mb-4">
+    <p>Nothing has been published yet ...</p>
+  </div>
 
-    <table border="1">
-        <tr>
-            <th>Pub Date</th>
-            <th>Title</th>
-            <th>Summary</th>
-            <th>Link</th>
-        </tr>
-        <tr th:each="article: ${articles}">
-            <td th:text="${article.date}"/>
-            <td th:text="${article.title}"/>
-            <td th:text="${article.summary}"/>
-            <td><a th:text="'/article/'+${article.id}" th:href="'/article/'+${article.id}"/></td>
-        </tr>
-    </table>
+  <div th:each="article: ${articles}" class="mb-4">
+    <h3><a th:href="'/article/'+${article.id}" th:text="${article.title}"/></h3>
+    <p class="small" th:text="${#temporals.format(article.date, 'EEE, d MMM yyyy')}"/>
+    <p th:text="${article.summary}"/>
+    <p><a th:href="'/article/'+${article.id}"/>Read more ...</a></p>
+  </div>
 </div>
-
 <script th:inline="javascript">
-        const REG_CONTRACT_ADDRESS = [[${regContractAddr}]];
-        const PUB_CONTRACT_ADDRESS = [[${pubContractAddr}]];
+  const REG_CONTRACT_ADDRESS = [[${regContractAddr}]];
+  const PUB_CONTRACT_ADDRESS = [[${pubContractAddr}]];
 </script>
-<script type="text/javascript" src="/js/ethers.js"></script>
 <script type="module" src="/js/home.js"></script>
 </body>
 </html>

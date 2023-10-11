@@ -60,6 +60,30 @@
                 <artifactId>download-maven-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>download-bootstrap-css</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://cdn.jsdelivr.net/npm/bootstrap@${bootstrap.version}/dist/css/bootstrap.min.css</url>
+                            <outputDirectory>target/classes/static/css</outputDirectory>
+                            <outputFileName>bootstrap.css</outputFileName>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-bootstrap-js</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://cdn.jsdelivr.net/npm/bootstrap@${bootstrap.version}/dist/js/bootstrap.bundle.min.js</url>
+                            <outputDirectory>target/classes/static/js</outputDirectory>
+                            <outputFileName>bootstrap.js</outputFileName>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>download-ethers-js</id>
                         <phase>process-resources</phase>
                         <goals>

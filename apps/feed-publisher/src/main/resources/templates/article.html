@@ -1,16 +1,20 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-</head>
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:th="https://www.thymeleaf.org" th:replace="~{base :: layout(~{::div}, ~{}, ~{})}">>
+<head></head>
 <body>
 <div>
+  <div class="mb-4">
+    <h4 th:text="${appTitle}"/>
     <h1 th:text="${article.title}"/>
-    <p th:text="${article.date}"/>
-    <p th:text="${article.summary}"/>
+    <p class="small" th:text="${#temporals.format(article.date, 'EEE, d MMM yyyy')}"/>
+  </div>
+
+  <div>
     <th:block th:each="cp : ${#strings.arraySplit(article.content, '&#10;')}">
-        <p th:if="${#strings.isEmpty(cp) == false}" th:text="${cp}"/>
+      <p th:if="${#strings.isEmpty(cp) == false}" th:text="${cp}"/>
     </th:block>
+  </div>
 </div>
 </body>
 </html>

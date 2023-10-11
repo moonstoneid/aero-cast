@@ -7,4 +7,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 public class AppProperties {
     private String baseUrl;
+    private String title;
+    private String subTitle;
 }

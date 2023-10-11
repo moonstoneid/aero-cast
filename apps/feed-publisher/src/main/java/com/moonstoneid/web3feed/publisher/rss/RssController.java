@@ -22,11 +22,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class RssController {
 
+    private final String appTitle;
+    private final String appSubTitle;
     private final String baseUrl;
 
     private final ArticleService articleService;
 
     public RssController(AppProperties appProperties, ArticleService articleService) {
+        this.appTitle = appProperties.getTitle();
+        this.appSubTitle = appProperties.getSubTitle();
         this.baseUrl = appProperties.getBaseUrl();
         this.articleService = articleService;
     }
@@ -42,8 +46,8 @@ public class RssController {
     private SyndFeed createRssFeed(List<Article> articles) {
         SyndFeed feed = new SyndFeedImpl();
         feed.setFeedType("rss_2.0");
-        feed.setTitle("A sample web3 publisher");
-        feed.setDescription("A sample web3 feed");
+        feed.setTitle(appTitle);
+        feed.setDescription(appSubTitle);
         feed.setLink(baseUrl);
         feed.setEntries(createRssEntries(articles));
         return feed;
