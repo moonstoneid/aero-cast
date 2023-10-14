@@ -33,11 +33,13 @@ public interface EntryRepo extends JpaRepository<Entry, Entry.EntryId> {
 
     @Query("SELECT p.contractAddress AS pubContractAddress, p.name AS pubName, e.title AS title, " +
             "e.description AS description, e.date AS date, e.url AS url " +
-            "FROM Entry e, Publisher p " +
+            "FROM Entry e " +
+            "JOIN Publisher p ON e.pubContractAddress = p.contractAddress " +
             "WHERE e.pubContractAddress IN (" +
             "SELECT s.pubContractAddress " +
             "FROM Subscription s " +
-            "WHERE s.subContractAddress = :subContractAddr)")
+            "WHERE s.subContractAddress = :subContractAddr)" +
+            "ORDER BY e.date DESC")
     List<EntryDTO> findAllBySubscriberContractAddress(String subContractAddr);
 
 }
