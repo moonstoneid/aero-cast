@@ -1,13 +1,7 @@
 package com.moonstoneid.web3feed.aggregator.controller;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.moonstoneid.web3feed.aggregator.controller.model.EntryVM;
 import com.moonstoneid.web3feed.aggregator.controller.model.SubscriberVM;
-import com.moonstoneid.web3feed.aggregator.model.Entry;
 import com.moonstoneid.web3feed.aggregator.model.Subscriber;
-import com.moonstoneid.web3feed.aggregator.service.EntryService;
 import com.moonstoneid.web3feed.aggregator.service.SubscriberService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,11 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class SubscriberController {
 
     private final SubscriberService subscriberService;
-    private final EntryService entryService;
 
-    public SubscriberController(SubscriberService subscriberService, EntryService entryService) {
+    public SubscriberController(SubscriberService subscriberService) {
         this.subscriberService = subscriberService;
-        this.entryService = entryService;
     }
 
     @GetMapping(value = "/{address}", produces = { "application/json" })
@@ -49,33 +41,10 @@ public class SubscriberController {
         subscriberService.removeSubscriber(address);
     }
 
-    @GetMapping(value = "/{address}/entries", produces = { "application/json" })
-    public @ResponseBody List<EntryVM> getEntries(@PathVariable("address") String address) {
-        Subscriber subscriber = subscriberService.getSubscriber(address);
-        List<Entry> entries = entryService.getEntriesBySubscriberContractAddress(
-                subscriber.getContractAddress());
-        return toViewModel(entries);
-    }
-
     private static SubscriberVM toViewModel(Subscriber subscriber) {
         SubscriberVM subscriberVM = new SubscriberVM();
         subscriberVM.contractAddress = subscriber.getContractAddress();
         return subscriberVM;
-    }
-
-    private static List<EntryVM> toViewModel(List<Entry> entries) {
-        return entries.stream()
-                .map(SubscriberController::toViewModel)
-                .collect(Collectors.toList());
-    }
-
-    private static EntryVM toViewModel(Entry entry) {
-        EntryVM entryVM = new EntryVM();
-        entryVM.title = entry.getTitle();
-        entryVM.description = entry.getDescription();
-        entryVM.date = entry.getDate();
-        entryVM.url = entry.getUrl();
-        return entryVM;
     }
 
 }

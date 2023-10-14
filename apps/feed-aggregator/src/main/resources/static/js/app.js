@@ -29,7 +29,10 @@ const appTmpl = `
   </div>
   <div v-for="entry in entries" class="mb-4">
     <h5><a v-on:click.prevent="$event => toggleEntryVisibility(entry)" href="#" target="_blank">{{ entry.title }}</a></h5>
-    <p class="small">{{ entry.date }}</p>
+    <div class="d-flex flex-row align-items-center mb-2">
+      <img class="publisher-icon me-2" v-bind:src="entry.pubFavicon">
+      <p class="small m-0">{{ entry.pubName }} - {{ entry.date }}</p>
+    </div>
     <div v-if="entry.visible">
       <p>{{ entry.description }}</p>
       <p><a v-bind:href="entry.url" target="_blank">Read more ...</a></p>
@@ -130,6 +133,8 @@ const fetchEntries = async function(account) {
 const mapEntries = function(entries) {
     const es = entries.map(e => (
         {
+            pubFavicon: "/publisher/" + e.pubContractAddress + "/favicon.ico",
+            pubName: e.pubName,
             title: e.title,
             date: formatDate(Date.parse(e.date)),
             description: e.description,
@@ -144,11 +149,11 @@ const mapEntries = function(entries) {
 };
 
 const formatDate = function(date) {
-    const df = new Intl.DateTimeFormat('en-US', {
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
+    const df = new Intl.DateTimeFormat("en-US", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
     });
     return df.format(date);
 };

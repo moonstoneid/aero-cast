@@ -1,6 +1,8 @@
 CREATE TABLE publisher (
   contract_address VARCHAR(42) NOT NULL,
   feed_url VARCHAR(500) NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  favicon BLOB DEFAULT NULL,
   block_number VARCHAR(42) NOT NULL,
   PRIMARY KEY (contract_address)
 );

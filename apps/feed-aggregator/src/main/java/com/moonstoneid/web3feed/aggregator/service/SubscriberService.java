@@ -86,19 +86,21 @@ public class SubscriberService implements EthSubscriberAdapter.EventCallback {
 
         log.info("Trying to create subscriber '{}' ...", EthUtil.shortenAddress(accountAddr));
 
+        String currentBlockNum = ethSubscriberAdapter.getCurrentBlockNumber();
+
+        // Check if subscriber exists
         if (subscriberRepo.existsById(accountAddr)) {
             log.error("Subscriber '{}' already exists!", EthUtil.shortenAddress(subAccountAddr));
             throw new ConflictException("Subscriber already exists!");
         }
 
+        // Get subscriber contract address
         String contractAddr = ethSubscriberAdapter.getSubscriberContractAddress(accountAddr);
         if (contractAddr == null) {
             log.error("Contract for subscriber '{}' was not found!", EthUtil.shortenAddress(
                     accountAddr));
             throw new NotFoundException("Subscriber was not found!");
         }
-
-        String currentBlockNum = ethSubscriberAdapter.getCurrentBlockNumber();
 
         // Create subscriber
         Subscriber sub = new Subscriber();
@@ -122,6 +124,7 @@ public class SubscriberService implements EthSubscriberAdapter.EventCallback {
 
         log.info("Trying to remove subscriber '{}' ...", EthUtil.shortenAddress(accountAddr));
 
+        // Check if subscriber exists
         Optional<Subscriber> sub = findSubscriber(accountAddr);
         if (sub.isEmpty()) {
             log.error("Subscriber '{}' was not found!", EthUtil.shortenAddress(accountAddr));
