@@ -9,4 +9,5 @@ public class AppProperties {
     private String baseUrl;
     private String title;
     private String subTitle;
+    private String iconPath;
 }

@@ -1,6 +1,5 @@
 package com.moonstoneid.web3feed.publisher.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.moonstoneid.web3feed.common.config.EthPublisherProperties;

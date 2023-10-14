@@ -1,3 +1,13 @@
 a {
   text-decoration: none
 }
+
+.icon {
+  width: 2rem;
+  height: 2rem;
+}
+
+.icon-small {
+  width: 1.2rem;
+  height: 1.2rem;
+}

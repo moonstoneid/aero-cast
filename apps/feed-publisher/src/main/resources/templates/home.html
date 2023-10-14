@@ -6,7 +6,10 @@
 <div>
   <div class="mb-5">
     <div class="mb-3">
-      <h1 th:text="${appTitle}"/>
+      <div class="d-flex flex-row align-items-center mb-2">
+        <img class="icon me-3" src="/favicon.ico">
+        <h1 class="m-0" th:text="${appTitle}"/>
+      </div>
       <p th:text="${appSubTitle}"/>
     </div>
     <div class="mb-3">
