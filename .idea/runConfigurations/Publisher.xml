@@ -1,0 +1,25 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Publisher" type="Application" factoryName="Application">
+    <envs>
+      <env name="APP_PORT" value="8081" />
+      <env name="APP_BASE_URL" value="http://127.0.0.1:8081" />
+      <env name="APP_TITLE" value="Demo Publisher" />
+      <env name="APP_SUB_TITLE" value="A demo publisher for testing." />
+      <env name="APP_ICON_PATH" value="./pub.ico" />
+      <env name="H2_FILE" value="./pubdb" />
+      <env name="H2_USERNAME" value="sa" />
+      <env name="H2_PASSWORD" value="password" />
+      <env name="H2_SERVER_PORT" value="9091" />
+      <env name="ETH_API_URL" value="http://127.0.0.1:8545" />
+      <env name="ETH_REGISTRY_CONTRACT_ADDRESS" value="0x5FbDB2315678afecb367f032d93F642f64180aa3" />
+      <env name="ETH_PUBLISHER_PRIVATE_KEY" value="0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d" />
+      <env name="ETH_PUBLISHER_CONTRACT_ADDRESS" value="0xa16E02E87b7454126E5E10d957A927A7F5B5d2be" />
+    </envs>
+    <module name="web3-feed-publisher" />
+    <option name="MAIN_CLASS_NAME" value="com.moonstoneid.web3feed.publisher.App" />
+    <option name="WORKING_DIRECTORY" value="apps" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
