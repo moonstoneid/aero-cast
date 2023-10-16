@@ -1,0 +1,1 @@
+docker volume rm web3-feed_ganache web3-feed_aggregator web3-feed_publisher-1 web3-feed_publisher-2

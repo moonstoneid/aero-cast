@@ -2,7 +2,7 @@ const { getAddresses, getAccounts, getErrorMessage } = require('./helpers/utils'
 
 const FeedRegistry = artifacts.require("./FeedRegistry.sol");
 
-const FEED_URL = "http://localhost:8081/rss";
+const FEED_URL = "http://localhost:8082/rss";
 
 const main = async (callback) => {
   try {

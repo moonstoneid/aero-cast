@@ -1,11 +1,11 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Aggregator" type="Application" factoryName="Application">
     <envs>
-      <env name="APP_PORT" value="8082" />
+      <env name="APP_PORT" value="8081" />
       <env name="H2_FILE" value="./aggdb" />
       <env name="H2_USERNAME" value="sa" />
       <env name="H2_PASSWORD" value="password" />
-      <env name="H2_SERVER_PORT" value="9092" />
+      <env name="H2_SERVER_PORT" value="9091" />
       <env name="ETH_API_URL" value="http://127.0.0.1:8545" />
       <env name="ETH_REGISTRY_CONTRACT_ADDRESS" value="0x5FbDB2315678afecb367f032d93F642f64180aa3" />
     </envs>
