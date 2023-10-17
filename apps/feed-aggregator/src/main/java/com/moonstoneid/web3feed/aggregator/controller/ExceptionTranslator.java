@@ -20,11 +20,13 @@ public class ExceptionTranslator {
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
     public void notFoundError(NotFoundException ex) {
+
     }
 
     @ExceptionHandler(ConflictException.class)
     @ResponseStatus(value = HttpStatus.CONFLICT)
     public void conflictError(ConflictException ex) {
+
     }
 
     @ExceptionHandler(Exception.class)

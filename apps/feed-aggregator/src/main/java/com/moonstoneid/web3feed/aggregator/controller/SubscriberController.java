@@ -31,13 +31,13 @@ public class SubscriberController {
 
     @PostMapping(value = "/{address}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void registerSubscriber(@PathVariable("address") String address) {
+    public void enlistSubscriber(@PathVariable("address") String address) {
         subscriberService.createSubscriber(address);
     }
 
     @DeleteMapping(value = "/{address}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void unregisterSubscriber(@PathVariable("address") String address) {
+    public void delistSubscriber(@PathVariable("address") String address) {
         subscriberService.removeSubscriber(address);
     }
 
