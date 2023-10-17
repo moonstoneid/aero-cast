@@ -3,7 +3,7 @@ package com.moonstoneid.web3feed.aggregator.eth;
 import java.util.List;
 
 import com.moonstoneid.web3feed.common.config.EthRegistryProperties;
-import com.moonstoneid.web3feed.common.eth.BaseEthProxy;
+import com.moonstoneid.web3feed.common.eth.BaseEthAdapter;
 import com.moonstoneid.web3feed.common.eth.EthUtil;
 import com.moonstoneid.web3feed.common.eth.contracts.FeedRegistry;
 import com.moonstoneid.web3feed.common.eth.contracts.FeedSubscriber;
@@ -20,7 +20,7 @@ import org.web3j.protocol.core.methods.request.EthFilter;
 
 @Component
 @Slf4j
-public class EthSubscriberAdapter extends BaseEthProxy {
+public class EthSubscriberAdapter extends BaseEthAdapter {
 
     public interface EventCallback {
         void onCreateSubscription(String subContractAddr, String blockNumber, String pubContractAddr);
@@ -41,7 +41,12 @@ public class EthSubscriberAdapter extends BaseEthProxy {
     public String getSubscriberContractAddress(String subAccountAddr) {
         FeedRegistry contract = getRegistryContract();
         try {
-            return contract.getSubscriberContractByAddress(subAccountAddr).sendAsync().get();
+            String subContractAddr = contract.getSubscriberContractByAddress(subAccountAddr)
+                    .sendAsync().get();
+            if (!isValidAddress(subContractAddr)) {
+                return null;
+            }
+            return subContractAddr;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -100,11 +105,11 @@ public class EthSubscriberAdapter extends BaseEthProxy {
     }
 
     private FeedRegistry getRegistryContract() {
-        return FeedRegistry.load(regContractAddr, web3j, credentials, contractGasProvider);
+        return createRegistryContract(regContractAddr, credentials);
     }
 
     private FeedSubscriber getSubscriberContract(String contractAddr) {
-        return FeedSubscriber.load(contractAddr, web3j, credentials, contractGasProvider);
+        return createSubscriberContract(contractAddr, credentials);
     }
 
 }

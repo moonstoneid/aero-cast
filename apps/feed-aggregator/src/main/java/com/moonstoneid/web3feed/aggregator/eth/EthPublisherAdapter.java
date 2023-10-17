@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.moonstoneid.web3feed.common.eth.BaseEthProxy;
+import com.moonstoneid.web3feed.common.eth.BaseEthAdapter;
 import com.moonstoneid.web3feed.common.eth.EthUtil;
 import com.moonstoneid.web3feed.common.eth.contracts.FeedPublisher;
 import com.moonstoneid.web3feed.common.eth.contracts.FeedPublisher.NewPubItemEventResponse;
@@ -20,7 +20,7 @@ import org.web3j.protocol.core.methods.request.EthFilter;
 
 @Component
 @Slf4j
-public class EthPublisherAdapter extends BaseEthProxy {
+public class EthPublisherAdapter extends BaseEthAdapter {
 
     public interface EventCallback {
         void onNewPubItem(String pubContractAddr, String blockNumber, PubItem pubItem);
@@ -102,7 +102,7 @@ public class EthPublisherAdapter extends BaseEthProxy {
     }
 
     private FeedPublisher getPublisherContract(String contractAddr) {
-        return FeedPublisher.load(contractAddr, web3j, credentials, contractGasProvider);
+        return createPublisherContract(contractAddr, credentials);
     }
 
 }

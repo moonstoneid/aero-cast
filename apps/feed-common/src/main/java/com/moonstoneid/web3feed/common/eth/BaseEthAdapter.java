@@ -2,6 +2,9 @@ package com.moonstoneid.web3feed.common.eth;
 
 import java.math.BigInteger;
 
+import com.moonstoneid.web3feed.common.eth.contracts.FeedPublisher;
+import com.moonstoneid.web3feed.common.eth.contracts.FeedRegistry;
+import com.moonstoneid.web3feed.common.eth.contracts.FeedSubscriber;
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.datatypes.Event;
 import org.web3j.crypto.Credentials;
@@ -14,12 +17,12 @@ import org.web3j.protocol.core.methods.response.BaseEventResponse;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.utils.Numeric;
 
-public abstract class BaseEthProxy {
+public abstract class BaseEthAdapter {
 
     private static final BigInteger GAS_LIMIT = BigInteger.valueOf(6721975L);
     private static final BigInteger GAS_PRICE = BigInteger.valueOf(20000000000L);
 
-    protected final ContractGasProvider contractGasProvider = new ContractGasProvider() {
+    private final ContractGasProvider contractGasProvider = new ContractGasProvider() {
         @Override
         public BigInteger getGasPrice(String contractFunc) {
             return GAS_PRICE;
@@ -41,9 +44,9 @@ public abstract class BaseEthProxy {
         }
     };
 
-    protected final Web3j web3j;
+    private final Web3j web3j;
 
-    protected BaseEthProxy(Web3j web3j) {
+    protected BaseEthAdapter(Web3j web3j) {
         this.web3j = web3j;
     }
 
@@ -83,6 +86,22 @@ public abstract class BaseEthProxy {
 
     protected static String getBlockNumberFromEventResponse(BaseEventResponse response) {
         return Numeric.toHexStringWithPrefix(response.log.getBlockNumber());
+    }
+
+    protected FeedPublisher createPublisherContract(String contractAddr, Credentials credentials) {
+        return new FeedPublisherWrapper(contractAddr, web3j, credentials, contractGasProvider);
+    }
+
+    protected FeedRegistry createRegistryContract(String contractAddr, Credentials credentials) {
+        return new FeedRegistryWrapper(contractAddr, web3j, credentials, contractGasProvider);
+    }
+
+    protected FeedSubscriber createSubscriberContract(String contractAddr, Credentials credentials) {
+        return new FeedSubscriberWrapper(contractAddr, web3j, credentials, contractGasProvider);
+    }
+
+    protected static boolean isValidAddress(String address) {
+        return address != null && !address.equals("0x0000000000000000000000000000000000000000");
     }
 
 }
