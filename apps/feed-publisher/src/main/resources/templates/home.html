@@ -12,9 +12,14 @@
       </div>
       <p th:text="${appSubTitle}"/>
     </div>
+    <div id="error-container" class="alert alert-warning alert-dismissible" style="display: none">
+      <span></span>
+      <button class="btn-close" aria-label="Close"></button>
+    </div>
     <div class="mb-3">
-      <button id="subscribe-button" class="btn btn-light">Subscribe</button>
-      <button id="unsubscribe-button" class="btn btn-light">Unsubscribe</button>
+      <button id="connect-wallet-button" class="btn btn-light">Connect Wallet</button>
+      <button id="subscribe-button" class="btn btn-light" style="display: none">Subscribe</button>
+      <button id="unsubscribe-button" class="btn btn-light" style="display: none">Unsubscribe</button>
     </div>
   </div>
 
