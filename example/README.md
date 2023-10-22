@@ -1,22 +1,5 @@
 # Local example with Ganache blockchain
 
-## Run example
-
-Start:
-```
-./compose-up.sh
-```
-
-Stop:
-```
-./compose-down.sh
-```
-
-Remove data:
-```
-./volume-rm.sh
-```
-
 ## Accounts
 
 - Publisher 1: (1)

@@ -1,0 +1,9 @@
+#!/bin/bash
+APP_PORT="8081" \
+H2_FILE="./aggdb" \
+H2_USERNAME="sa" \
+H2_PASSWORD="password" \
+H2_SERVER_PORT="9091" \
+ETH_API_URL="http://127.0.0.1:8545" \
+ETH_REGISTRY_CONTRACT_ADDRESS="0x5FbDB2315678afecb367f032d93F642f64180aa3" \
+java -jar ./app.jar
