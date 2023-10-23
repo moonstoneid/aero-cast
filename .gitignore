@@ -1,5 +1,7 @@
 # IntelliJ project files
 /.idea
+!/.idea/runConfigurations/Aggregator.xml
+!/.idea/runConfigurations/Publisher.xml
 *.iml
 
 # VS Code project files
