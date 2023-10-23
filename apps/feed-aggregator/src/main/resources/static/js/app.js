@@ -46,6 +46,7 @@ const appTmpl = `
 `;
 
 const { ethereum } = window;
+let newEntryEventSource;
 
 const getAccount = async function() {
     if (!ethereum) {
@@ -151,23 +152,43 @@ const fetchEntries = async function(account) {
     throw new Error("A unknown error occurred!");
 };
 
+const registerNewEntryEventSource = function(account, callback) {
+    newEntryEventSource = new EventSource("/sse/" + account);
+    newEntryEventSource.onmessage = (e) => {
+        callback(mapEntry(JSON.parse(e.data)));
+    };
+    newEntryEventSource.onerror = (error) => {
+        console.error("Error receiving server updates:", error);
+        newEntryEventSource.close();
+    };
+};
+
+const unregisterNewEntryEventSource = function() {
+    if (newEntryEventSource != null) {
+        newEntryEventSource.close();
+    }
+}
+
 const mapEntries = function(entries) {
-    const es = entries.map(e => (
-        {
-            pubFavicon: "/publisher/" + e.pubContractAddress + "/favicon.ico",
-            pubName: e.pubName,
-            title: e.title,
-            date: formatDate(Date.parse(e.date)),
-            description: e.description,
-            url: e.url,
-            visible: false,
-        }
-    ));
+    const es = entries.map(e => mapEntry(e));
     if (es.length > 0) {
         es[0].visible = true;
     }
     return es;
 };
+
+const mapEntry = function(e) {
+    return {
+        pubFavicon: "/publisher/" + e.pubContractAddress + "/favicon.ico",
+        pubName: e.pubName,
+        title: e.title,
+        date: formatDate(Date.parse(e.date)),
+        description: e.description,
+        url: e.url,
+        visible: false,
+    };
+};
+
 
 const formatDate = function(date) {
     const df = new Intl.DateTimeFormat("en-US", {
@@ -191,6 +212,7 @@ createApp({
     },
     async created() {
         this.error = null;
+
         try {
             this.account = await getAccount();
             if (this.account === null) {
@@ -201,6 +223,8 @@ createApp({
                 return;
             }
             this.entries = await fetchEntries(this.account);
+
+            registerNewEntryEventSource(this.account, (e) => this.entries.unshift(e));
         } catch (e) {
             this.error = e.message;
         }
@@ -220,6 +244,7 @@ createApp({
                 await enlist(this.account);
                 this.isEnlisted = true;
                 this.entries = await fetchEntries(this.account);
+                registerNewEntryEventSource(this.account, (e) => this.entries.push(e));
             } catch (e) {
                 this.error = e.message;
             }
@@ -227,6 +252,7 @@ createApp({
         async handleDelist() {
             this.error = null;
             try {
+                unregisterNewEntryEventSource();
                 await delist(this.account);
                 this.isEnlisted = false;
                 this.entries = [];

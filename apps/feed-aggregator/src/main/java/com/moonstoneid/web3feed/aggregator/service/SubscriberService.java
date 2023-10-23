@@ -1,5 +1,6 @@
 package com.moonstoneid.web3feed.aggregator.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -178,6 +179,10 @@ public class SubscriberService implements EthSubscriberAdapter.EventCallback {
 
     private void updateSubscriberEventBlockNumber(String subContractAddr, String blockNumber) {
         subscriberRepo.updateSubscriberBlockNumber(subContractAddr, blockNumber);
+    }
+
+    public List<Subscription> getPublisherSubscriptions(String pubContractAddr) {
+        return subscriptionRepo.findAllByPublisherContractAddress(pubContractAddr);
     }
 
 }

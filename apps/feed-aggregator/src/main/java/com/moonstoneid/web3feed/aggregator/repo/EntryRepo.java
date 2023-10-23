@@ -1,6 +1,7 @@
 package com.moonstoneid.web3feed.aggregator.repo;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.moonstoneid.web3feed.aggregator.model.Entry;
 import com.moonstoneid.web3feed.aggregator.model.EntryDTO;
@@ -40,6 +41,14 @@ public interface EntryRepo extends JpaRepository<Entry, Entry.EntryId> {
             "FROM Subscription s " +
             "WHERE s.subContractAddress = :subContractAddr)" +
             "ORDER BY e.date DESC")
-    List<EntryDTO> findAllBySubscriberContractAddress(String subContractAddr);
+    List<EntryDTO> findAllSubscriberEntries(String subContractAddr);
+
+    @Query("SELECT p.contractAddress AS pubContractAddress, p.name AS pubName, e.title AS title, " +
+            "e.description AS description, e.date AS date, e.url AS url " +
+            "FROM Entry e " +
+            "JOIN Publisher p ON e.pubContractAddress = p.contractAddress " +
+            "WHERE e.pubContractAddress = :pubContrAddr " +
+            "AND e.number = :number")
+    Optional<EntryDTO> findPublisherEntry(String pubContrAddr, Integer number);
 
 }

@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Repository
 public interface SubscriptionRepo extends JpaRepository<Subscription, String> {
 
@@ -25,5 +27,11 @@ public interface SubscriptionRepo extends JpaRepository<Subscription, String> {
             "WHERE s.subContractAddress = :subContractAddr " +
             "AND s.pubContractAddress = :pubContractAddr")
     void deleteById(String subContractAddr, String pubContractAddr);
+
+
+    @Query("SELECT s " +
+            "FROM Subscription s " +
+            "WHERE s.pubContractAddress = :pubContractAddr")
+    List<Subscription> findAllByPublisherContractAddress(String pubContractAddr);
 
 }

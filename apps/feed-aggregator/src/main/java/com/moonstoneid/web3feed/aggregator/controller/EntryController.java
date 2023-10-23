@@ -29,7 +29,7 @@ public class EntryController {
     @GetMapping(value = "/{address}/entries", produces = { "application/json" })
     public @ResponseBody List<EntryVM> getEntries(@PathVariable("address") String address) {
         Subscriber subscriber = subscriberService.getSubscriber(address);
-        List<EntryDTO> entries = entryService.getEntriesBySubscriberContractAddress(
+        List<EntryDTO> entries = entryService.getSubscriberEntries(
                 subscriber.getContractAddress());
         return toViewModel(entries);
     }

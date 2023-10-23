@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class PublisherService implements EthPublisherAdapter.EventCallback {
+public class PublisherService implements EthPublisherAdapter.EventListener {
 
     private final PublisherRepo publisherRepo;
     private final SubscriptionRepo subscriptionRepo;
@@ -44,7 +44,7 @@ public class PublisherService implements EthPublisherAdapter.EventCallback {
     // Register listeners after Spring Boot has started
     @EventListener(ApplicationReadyEvent.class)
     protected void initEventListener() {
-        getPublishers().forEach(p -> ethPublisherAdapter.registerPubItemEventListener(
+        getPublishers().forEach(p -> ethPublisherAdapter.registerEventListener(
                 p.getContractAddress(), p.getBlockNumber(), this));
     }
 
@@ -132,7 +132,7 @@ public class PublisherService implements EthPublisherAdapter.EventCallback {
         entryService.fetchEntries(pubContractAddr, feed, pubItemGuids);
 
         // Register publisher event listener
-        ethPublisherAdapter.registerPubItemEventListener(contractAddr, currentBlockNum, this);
+        ethPublisherAdapter.registerEventListener(contractAddr, currentBlockNum, this);
 
         log.info("Publisher '{}' was created.", EthUtil.shortenAddress(contractAddr));
     }
@@ -150,7 +150,7 @@ public class PublisherService implements EthPublisherAdapter.EventCallback {
         }
 
         // Unregister publisher event listener
-        ethPublisherAdapter.unregisterPubItemEventListener(contractAddr);
+        ethPublisherAdapter.unregisterEventListener(contractAddr);
 
         // Remove publisher entries
         entryService.removeEntries(contractAddr);

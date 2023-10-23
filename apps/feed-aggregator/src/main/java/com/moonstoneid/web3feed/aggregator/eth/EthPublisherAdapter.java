@@ -22,7 +22,7 @@ import org.web3j.protocol.core.methods.request.EthFilter;
 @Slf4j
 public class EthPublisherAdapter extends BaseEthAdapter {
 
-    public interface EventCallback {
+    public interface EventListener {
         void onNewPubItem(String pubContractAddr, String blockNumber, PubItem pubItem);
     }
 
@@ -35,8 +35,8 @@ public class EthPublisherAdapter extends BaseEthAdapter {
         this.credentials = createDummyCredentials();
     }
 
-    public void registerPubItemEventListener(String pubContractAddr, String blockNumber,
-            EventCallback callback) {
+    public void registerEventListener(String pubContractAddr, String blockNumber,
+            EventListener listener) {
         log.debug("Adding event listener on publisher contract '{}'.",
                 EthUtil.shortenAddress(pubContractAddr));
 
@@ -45,18 +45,18 @@ public class EthPublisherAdapter extends BaseEthAdapter {
         EthFilter eventFilter = createEventFilter(pubContractAddr, blockNumber,
                 FeedPublisher.NEWPUBITEM_EVENT);
         Disposable eventSubscriber = contract.newPubItemEventFlowable(eventFilter)
-                .subscribe(r -> handleNewPubItemEvent(pubContractAddr, r, callback));
+                .subscribe(r -> handleNewPubItemEvent(pubContractAddr, r, listener));
         eventSubscribers.add(pubContractAddr, eventSubscriber);
     }
 
     private void handleNewPubItemEvent(String pubContractAddr, NewPubItemEventResponse response,
-            EventCallback callback) {
+            EventListener listener) {
         String blockNumber = getBlockNumberFromEventResponse(response);
         PubItem item = getPublisherItem(pubContractAddr, response.num);
-        callback.onNewPubItem(pubContractAddr, blockNumber, item);
+        listener.onNewPubItem(pubContractAddr, blockNumber, item);
     }
 
-    public void unregisterPubItemEventListener(String pubContractAddr) {
+    public void unregisterEventListener(String pubContractAddr) {
         log.debug("Removing event listener on publisher contract '{}'.",
                 EthUtil.shortenAddress(pubContractAddr));
 

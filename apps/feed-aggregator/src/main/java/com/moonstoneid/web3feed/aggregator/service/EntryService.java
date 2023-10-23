@@ -1,7 +1,9 @@
 package com.moonstoneid.web3feed.aggregator.service;
 
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.moonstoneid.web3feed.aggregator.model.EntryDTO;
 import com.moonstoneid.web3feed.common.eth.EthUtil;
@@ -16,10 +18,24 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class EntryService {
 
+    public interface EventListener {
+        void onNewEntry(EntryDTO entry);
+    }
+
     private final EntryRepo entryRepo;
+
+    private final List<EventListener> eventListeners = new ArrayList<>();
 
     public EntryService(EntryRepo entryRepo) {
         this.entryRepo = entryRepo;
+    }
+
+    public void registerEventListener(EventListener listener) {
+        eventListeners.add(listener);
+    }
+
+    public void unregisterEventListener(EventListener listener) {
+        eventListeners.remove(listener);
     }
 
     public void fetchEntries(String pubContractAddr, SyndFeed feed, List<String> guids) {
@@ -45,6 +61,8 @@ public class EntryService {
 
         int entryNumber = getNextEntryNumber(pubContractAddr);
         saveEntry(pubContractAddr, entryNumber, feedEntry);
+
+        notifyNewEntry(pubContractAddr, entryNumber);
     }
 
     private boolean existsFeedEntry(SyndFeed feed, String guid) {
@@ -90,8 +108,17 @@ public class EntryService {
         entryRepo.deleteAllByPublisherContractAddress(pubContractAddr);
     }
 
-    public List<EntryDTO> getEntriesBySubscriberContractAddress(String subContractAddr) {
-        return entryRepo.findAllBySubscriberContractAddress(subContractAddr);
+    public List<EntryDTO> getSubscriberEntries(String subContractAddr) {
+        return entryRepo.findAllSubscriberEntries(subContractAddr);
+    }
+
+    private void notifyNewEntry(String pubContractAddr, Integer number) {
+        Optional<EntryDTO> entry = findPublisherEntry(pubContractAddr, number);
+        entry.ifPresent(entryDTO -> eventListeners.forEach(l -> l.onNewEntry(entryDTO)));
+    }
+
+    private Optional<EntryDTO> findPublisherEntry(String pubContractAddr, Integer number) {
+        return entryRepo.findPublisherEntry(pubContractAddr, number);
     }
 
 }
