@@ -7,4 +7,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 public class EthApiProperties {
     private String url;
+    private boolean enableRequestLogging = false;
 }

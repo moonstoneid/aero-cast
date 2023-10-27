@@ -17,8 +17,9 @@ public class EthConfig {
     @Bean
     public Web3j web3j(EthApiProperties ethApiProperties) {
         String ethApiUrl = ethApiProperties.getUrl();
+        boolean enableRequestLogging = ethApiProperties.isEnableRequestLogging();
         log.debug("Using Ethereum API URL {}.", ethApiUrl);
-        return buildWeb3j(ethApiUrl, log.isDebugEnabled());
+        return buildWeb3j(ethApiUrl, enableRequestLogging);
     }
 
     public static Web3j buildWeb3j(String ethApiUrl, boolean enableRequestLogging) {
