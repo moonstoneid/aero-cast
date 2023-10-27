@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller()
 @RequestMapping(path = "/admin")
@@ -25,7 +26,9 @@ public class AdminController extends BaseController {
     }
 
     @GetMapping("")
-    public String admin(Model model) {
+    public String admin(@RequestParam(value = "success", required = false) Boolean success,
+            Model model) {
+        model.addAttribute("success", success);
         model.addAttribute("article", new CreateArticleVM());
         return "admin";
     }
@@ -36,7 +39,7 @@ public class AdminController extends BaseController {
 
         articleService.createArticle(article);
 
-        return "redirect:/admin";
+        return "redirect:/admin?success=true";
     }
 
 }
