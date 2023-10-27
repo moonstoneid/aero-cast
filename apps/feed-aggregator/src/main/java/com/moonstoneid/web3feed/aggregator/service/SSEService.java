@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.moonstoneid.web3feed.aggregator.controller.model.SSEEventVM;
 import com.moonstoneid.web3feed.aggregator.model.EntryDTO;
 import com.moonstoneid.web3feed.aggregator.model.Subscription;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Service
 @Slf4j
-public class SSEService implements EntryService.EventListener {
+public class SSEService implements EntryService.EventListener, SubscriberService.EventListener {
 
     private final SubscriberService subscriberService;
     private final EntryService entryService;
@@ -32,7 +33,8 @@ public class SSEService implements EntryService.EventListener {
 
     // Register listeners after Spring Boot has started
     @EventListener(ApplicationReadyEvent.class)
-    protected void initEventListener() {
+    public void initEventListener() {
+        subscriberService.registerEventListener(this);
         entryService.registerEventListener(this);
     }
 
@@ -46,20 +48,25 @@ public class SSEService implements EntryService.EventListener {
     }
 
     @Override
-    public void onNewEntry(EntryDTO entry) {
-        sendUpdate(entry);
+    public void onSubscriptionChange(String subContractAddr) {
+        sendSubscriptionChangeUpdate(subContractAddr);
     }
 
-    private void sendUpdate(EntryDTO entry) {
+    @Override
+    public void onNewEntry(EntryDTO entry) {
+        sendNewEntryUpdate(entry);
+    }
+
+    private void sendNewEntryUpdate(EntryDTO entry) {
         List<Subscription> subscriptions = subscriberService.getPublisherSubscriptions(
                 entry.getPubContractAddress());
         for (Subscription subscription : subscriptions) {
             String subContractAddr = subscription.getSubContractAddress();
-            sendSubscriberUpdate(subContractAddr, entry);
+            sendNewEntryUpdate(subContractAddr, entry);
         }
     }
 
-    private void sendSubscriberUpdate(String subContractAddr, EntryDTO entry) {
+    private void sendNewEntryUpdate(String subContractAddr, EntryDTO entry) {
         Set<SseEmitter> sseEmitters = emitters.get(subContractAddr);
         if (sseEmitters == null) {
             return;
@@ -68,7 +75,24 @@ public class SSEService implements EntryService.EventListener {
         while (iterator.hasNext()) {
             SseEmitter emitter = iterator.next();
             try {
-                emitter.send(entry);
+                emitter.send(new SSEEventVM<>(SSEEventVM.Command.INSERT, entry));
+            } catch (IOException e) {
+                emitter.complete();
+                iterator.remove();
+            }
+        }
+    }
+
+    private void sendSubscriptionChangeUpdate(String subContractAddr) {
+        Set<SseEmitter> sseEmitters = emitters.get(subContractAddr);
+        if (sseEmitters == null) {
+            return;
+        }
+        Iterator<SseEmitter> iterator = sseEmitters.iterator();
+        while (iterator.hasNext()) {
+            SseEmitter emitter = iterator.next();
+            try {
+                emitter.send(new SSEEventVM<>(SSEEventVM.Command.REFRESH, null));
             } catch (IOException e) {
                 emitter.complete();
                 iterator.remove();

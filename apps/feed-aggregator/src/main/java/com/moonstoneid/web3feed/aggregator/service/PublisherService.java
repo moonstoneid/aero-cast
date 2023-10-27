@@ -43,7 +43,7 @@ public class PublisherService implements EthPublisherAdapter.EventListener {
 
     // Register listeners after Spring Boot has started
     @EventListener(ApplicationReadyEvent.class)
-    protected void initEventListener() {
+    public void initEventListener() {
         getPublishers().forEach(p -> ethPublisherAdapter.registerEventListener(
                 p.getContractAddress(), p.getBlockNumber(), this));
     }

@@ -152,10 +152,15 @@ const fetchEntries = async function(account) {
     throw new Error("A unknown error occurred!");
 };
 
-const registerNewEntryEventSource = function(account, callback) {
+const registerNewEntryEventSource = function(account, refreshCallback, insertCallback) {
     newEntryEventSource = new EventSource("/sse/" + account);
     newEntryEventSource.onmessage = (e) => {
-        callback(mapEntry(JSON.parse(e.data)));
+        const event = JSON.parse(e.data);
+        if (event.cmd === "REFRESH") {
+            refreshCallback();
+        } else if (event.cmd === "INSERT") {
+            insertCallback(mapEntry(event.data));
+        }
     };
     newEntryEventSource.onerror = (error) => {
         console.error("Error receiving server updates:", error);
@@ -222,9 +227,11 @@ createApp({
             if (!this.isEnlisted) {
                 return;
             }
-            this.entries = await fetchEntries(this.account);
+            this.refreshEntries();
 
-            registerNewEntryEventSource(this.account, (e) => this.entries.unshift(e));
+            registerNewEntryEventSource(this.account,
+                (e) => this.refreshEntries(),
+                (e) => this.insertEntry(e));
         } catch (e) {
             this.error = e.message;
         }
@@ -243,8 +250,10 @@ createApp({
             try {
                 await enlist(this.account);
                 this.isEnlisted = true;
-                this.entries = await fetchEntries(this.account);
-                registerNewEntryEventSource(this.account, (e) => this.entries.push(e));
+                this.refreshEntries();
+                registerNewEntryEventSource(this.account,
+                    (e) => this.refreshEntries(),
+                    (e) => this.insertEntry(e));
             } catch (e) {
                 this.error = e.message;
             }
@@ -264,6 +273,12 @@ createApp({
             const visible = entry.visible;
             this.entries.forEach(e => {e.visible = false;});
             entry.visible = !visible;
+        },
+        refreshEntries() {
+            fetchEntries(this.account).then((es) => ( this.entries = es));
+        },
+        insertEntry(entry) {
+            this.entries.unshift(entry);
         }
     }
 }).mount("#app");

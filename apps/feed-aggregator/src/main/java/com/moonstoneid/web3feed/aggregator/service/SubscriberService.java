@@ -1,5 +1,6 @@
 package com.moonstoneid.web3feed.aggregator.service;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -15,18 +16,23 @@ import com.moonstoneid.web3feed.aggregator.repo.SubscriberRepo;
 import com.moonstoneid.web3feed.aggregator.repo.SubscriptionRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
 public class SubscriberService implements EthSubscriberAdapter.EventCallback {
 
+    public interface EventListener {
+        void onSubscriptionChange(String subContractAddr);
+    }
+
     private final SubscriberRepo subscriberRepo;
     private final SubscriptionRepo subscriptionRepo;
     private final PublisherService publisherService;
 
     private final EthSubscriberAdapter ethSubscriberAdapter;
+
+    private final List<EventListener> eventListeners = new ArrayList<>();
 
     public SubscriberService(SubscriberRepo subscriberRepo, SubscriptionRepo subscriptionRepo,
             PublisherService publisherService, EthSubscriberAdapter ethSubscriberAdapter) {
@@ -36,9 +42,17 @@ public class SubscriberService implements EthSubscriberAdapter.EventCallback {
         this.ethSubscriberAdapter = ethSubscriberAdapter;
     }
 
+    public void registerEventListener(EventListener listener) {
+        eventListeners.add(listener);
+    }
+
+    public void unregisterEventListener(EventListener listener) {
+        eventListeners.remove(listener);
+    }
+
     // Register listeners after Spring Boot has started
-    @EventListener(ApplicationReadyEvent.class)
-    protected void initEventListener() {
+    @org.springframework.context.event.EventListener(ApplicationReadyEvent.class)
+    public void initEventListener() {
         getSubscribers().forEach(s -> ethSubscriberAdapter.registerSubscriptionEventListener(
                 s.getContractAddress(), s.getBlockNumber(), this));
     }
@@ -48,11 +62,11 @@ public class SubscriberService implements EthSubscriberAdapter.EventCallback {
             String pubContractAddr) {
         String contractAddr = subContractAddr.toLowerCase();
 
-        // Update subscriber event block number
         updateSubscriberEventBlockNumber(contractAddr, blockNumber);
 
-        // Create subscription
         createSubscription(contractAddr, pubContractAddr);
+
+        eventListeners.forEach(l -> l.onSubscriptionChange(subContractAddr));
     }
 
     @Override
@@ -60,11 +74,11 @@ public class SubscriberService implements EthSubscriberAdapter.EventCallback {
             String pubContractAddr) {
         String contractAddr = subContractAddr.toLowerCase();
 
-        // Update subscriber event block number
         updateSubscriberEventBlockNumber(contractAddr, blockNumber);
 
-        // Remove subscription
         removeSubscription(contractAddr, pubContractAddr);
+
+        eventListeners.forEach(l -> l.onSubscriptionChange(subContractAddr));
     }
 
     public List<Subscriber> getSubscribers() {
