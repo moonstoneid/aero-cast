@@ -63,6 +63,7 @@
     </dependencies>
 
     <build>
+        <finalName>publisher</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
