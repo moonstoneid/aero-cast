@@ -13,7 +13,7 @@
 
     <groupId>com.moonstoneid</groupId>
     <artifactId>aero-cast-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
     <description>The parent of aero-cast apps.</description>
 
