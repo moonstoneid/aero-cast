@@ -7,13 +7,13 @@
 
     <parent>
         <groupId>com.moonstoneid</groupId>
-        <artifactId>web3-feed-parent</artifactId>
+        <artifactId>aero-cast-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>web3-feed-common</artifactId>
+    <artifactId>aero-cast-common</artifactId>
     <packaging>jar</packaging>
-    <description>The common logic of web3-feed apps.</description>
+    <description>The common logic of aero-cast apps.</description>
 
     <dependencies>
         <dependency>

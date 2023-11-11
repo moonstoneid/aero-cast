@@ -2,21 +2,21 @@
 
 docker build ^
   --file apps\feed-aggregator.Dockerfile ^
-  --tag "web3-feed-aggregator" ^
+  --tag "aero-cast-aggregator" ^
   apps
 
 docker build ^
   --file apps\feed-publisher.Dockerfile ^
-  --tag "web3-feed-publisher" ^
+  --tag "aero-cast-publisher" ^
   apps
 
 docker build ^
   --file example\Dockerfile ^
-  --tag "web3-feed-example" ^
+  --tag "aero-cast-example" ^
   example
 
 docker run ^
-  --name "web3-feed-example" ^
+  --name "aero-cast-example" ^
   --publish 8545:8545 ^
   --publish 8081:8081 ^
   --publish 9091:9091 ^
@@ -25,4 +25,4 @@ docker run ^
   --publish 8083:8083 ^
   --publish 9093:9093 ^
   --rm ^
-  web3-feed-example
+  aero-cast-example

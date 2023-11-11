@@ -16,11 +16,11 @@ RUN apt update && \
 
 FROM base
 COPY ganache /ganache
-COPY --from=web3-feed-aggregator /app/app.jar /apps/aggregator/app.jar
+COPY --from=aero-cast-aggregator /app/app.jar /apps/aggregator/app.jar
 COPY aggregator /apps/aggregator
-COPY --from=web3-feed-publisher /app/app.jar /apps/publisher-1/app.jar
+COPY --from=aero-cast-publisher /app/app.jar /apps/publisher-1/app.jar
 COPY publisher-1 /apps/publisher-1
-COPY --from=web3-feed-publisher /app/app.jar /apps/publisher-2/app.jar
+COPY --from=aero-cast-publisher /app/app.jar /apps/publisher-2/app.jar
 COPY publisher-2 /apps/publisher-2
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 EXPOSE 8545

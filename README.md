@@ -1,6 +1,7 @@
-# Web3 Feed
+![Aero Cast Logo](header.png "Milky Green Logo")
+# Aero Cast
 
-Web3 Feed is a demo of a _decentralized_ 🌐 and _interactive_ 👍 web feed.
+Aero Cast is a demo of a _decentralized_ 🌐 and _interactive_ 👍 web feed.
 
 Personal feeds are an integral part of the web. However, centralized social media platforms define
 how the user's feed is curated and threaten their users' privacy. At the same time, decentralized
@@ -9,7 +10,7 @@ systems like RSS/Atom are not curated and don't have a feedback channel.
 Put more generally, the fabric of the web is decentralized protocols but its applications are often
 centralized.
 
-Web3 Feed uses the Ethereum blockchain to build a decentralized feed on the application level, where
+Aero Cast uses the Ethereum blockchain to build a decentralized feed on the application level, where
 users can **subscribe to websites** and choose their feed aggregator freely.
 
 ![Demo](./demo-light.webp#gh-light-mode-only "Demo")
@@ -20,7 +21,7 @@ users can **subscribe to websites** and choose their feed aggregator freely.
 ![Overview](overview-light.png#gh-light-mode-only "Overview")
 ![Overview](overview-dark.png#gh-dark-mode-only "Overview")
 
-Web 3 feed consists of the following components:
+Aero Cast consists of the following components:
 
 - **Publishers** create content. This could be any website such as a blog or news site.
 - **Aggregators** are services that collect and curate published content on behalf of a subscriber.
@@ -76,7 +77,7 @@ The figure below illustrates the whole workflow on a technical level.
 
 ## Quickstart
 
-The easiest way to set up Web3 Feed is via Docker.
+The easiest way to set up Aero Cast is via Docker.
 
 The following command spins up a preconfigured local Ganache blockchain, one aggregator and two
 publishers with sample data:
